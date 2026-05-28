@@ -1,0 +1,400 @@
+---
+name: long-horizon-work
+description: Assess, start, and continue long-running autonomous coding work. Use when a user asks whether a coding task is suitable for long-horizon work, wants a goal/spec converted into a route.md, asks to execute a long-horizon route, or asks to resume/continue after interruption by picking up route.md and the execution ledger.
+---
+
+# Long Horizon Work
+
+Use this skill as the workflow for long-running autonomous coding tasks. Match the user's language in outputs.
+
+Choose the mode from the request:
+
+- `evaluate`: assess a goal/spec and, if suitable, produce a route document. Do not create a ledger yet.
+- `execute`: start working from a route document. Create the ledger if missing, then work autonomously.
+- `continue`: resume interrupted work. Read the route and existing ledger, then continue from recorded state.
+
+If the user only provides a new goal/spec, default to `evaluate`. If the user says "start", "execute", "run this route", or similar, use `execute`. If the user says "continue", "resume", "pick up", "context cleared", or similar, use `continue`.
+
+## Mode: Evaluate
+
+Evaluate whether the source task is suitable for long-horizon autonomous work.
+
+Classify it as:
+
+- `Suitable`: convert it into a route.
+- `Needs reframing`: explain what is missing, then provide a reframed route if reasonable assumptions can make it executable.
+- `Not suitable`: explain why and suggest a normal shorter prompt or minimum changes needed.
+
+Prefer `Suitable` when most are true:
+
+- The goal is valuable, non-trivial, and likely to take more than 30-60 minutes.
+- Success can be measured by tests, benchmarks, profiles, screenshots, static checks, logs, error rates, migration counts, or other repeatable evidence.
+- The path is uncertain enough to benefit from exploration, but the desired outcome is clear.
+- The agent can inspect the repo, run commands, make incremental changes, and verify results locally or in a safe test environment.
+- Boundaries, non-goals, safety rules, and rollback expectations can be written down.
+- Progress can be preserved outside context.
+- The work can be decomposed into small commits or reversible experiments.
+
+Prefer `Needs reframing` when:
+
+- The goal is broad but measurable after adding metrics or acceptance criteria.
+- The task is currently a fixed checklist, but can be reframed around an outcome.
+- The repo has weak validation, but the first slice can create the validation harness.
+- Product tradeoffs exist but can be isolated behind stop rules.
+
+Prefer `Not suitable` when:
+
+- The task is a small feature or bug fix that should be done directly.
+- The goal depends mainly on subjective taste, product judgment, negotiation, or user feedback.
+- The agent cannot verify progress without external production systems, credentials, manual QA, or user decisions.
+- The work is destructive, security-sensitive, legal/financial/medical high stakes, or likely to touch user data without clear approvals.
+- The task requires frequent human decisions or live operational access.
+- The requested outcome is so vague that an agent would invent success criteria.
+
+### Evaluate Output
+
+Produce:
+
+1. `Fit Assessment`
+2. `Route Document`
+3. `How To Start`
+4. `Open Questions Or Assumptions`
+
+If working in a repo or file-producing context, write only the route file during evaluate. Prefer:
+
+- `docs/long-horizon-route.md`
+- or a specific name such as `docs/janus-image-api-route.md`
+
+Do not create the ledger during evaluate. The ledger belongs to execution state and should be created only when `execute` starts. The route may name the planned ledger path.
+
+In `How To Start`, tell the user simply:
+
+```text
+This route is ready. Optionally clear context, then ask Codex to use long-horizon-work to execute <route-path>.
+```
+
+## Mode: Execute
+
+Use this when the user asks to start or execute a route.
+
+Steps:
+
+1. Locate the route document from the user's path or common names such as `docs/*route*.md`.
+2. Read the route and relevant source/spec if referenced.
+3. Inspect `git status`.
+4. Create the ledger at the path specified by the route. If no path is specified, create a sibling file named like `<route-name>-ledger.md`.
+5. Initialize the ledger as working memory for the active slice with run state, task board, validation surface status, experiment log, decision log, change log, discoveries, blockers, and next actions.
+6. Execute the first autonomous slice from the route.
+7. Work in evidence-driven cycles:
+   - choose the highest-value executable task;
+   - state the hypothesis and done condition in the ledger;
+   - establish or reuse baseline;
+   - make the smallest reversible change;
+   - run validation;
+   - compare before/after behavior;
+   - update the ledger;
+   - commit logically when validated and appropriate.
+8. When the active slice closes, consolidate durable results into the route, then archive or reset the ledger for the next slice.
+9. Stop only when a stop rule triggers, the active slice closes, or the user interrupts.
+
+Use the route as the execution plan.
+
+## Mode: Continue
+
+Use this when the user asks to resume after interruption, context clearing, or an earlier long run.
+
+Steps:
+
+1. Locate the route document:
+   - use the user's explicit path, or
+   - search common route names such as `docs/*route*.md`, or
+   - ask only if multiple plausible routes exist and choosing one would be risky.
+2. Locate the ledger:
+   - use the path named in the route, or
+   - use the user's explicit path, or
+   - search sibling/common names such as `docs/*ledger*.md`.
+3. Read route and ledger before relying on any chat memory.
+4. Inspect `git status` and recent commits.
+5. Resume the highest-value unblocked task in the active slice.
+6. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
+7. Continue the same evidence-driven cycle as execute mode.
+
+If the ledger is missing, do not invent prior state. Treat this as `execute` from the route and create a fresh ledger, noting that prior execution state was unavailable.
+
+## Route And Ledger Memory Model
+
+Keep route and ledger separate:
+
+- `route.md` is durable project memory. It stores the strategy, stable findings, completed slice summaries, verified results, durable decisions, disproven hypotheses, updated risks, deferred work, and next slices.
+- `ledger.md` is working memory for the active slice. It stores only the state needed to resume current work: active workstream, task board, recent experiments, current blockers, temporary notes, validation status, and next actions.
+
+Keep the ledger concise and relevant to the active slice. Avoid raw command noise unless it is evidence.
+
+At the end of each slice, run consolidation:
+
+1. Distill durable findings, results, decisions, risks, deferrals, and next-slice recommendations from the ledger into the route.
+2. Mark the active slice closed in the route with evidence.
+3. Archive the ledger or reset it for the next slice.
+4. If archiving, use a predictable path such as `docs/long-horizon-archive/<name>-ledger-<slice>.md`.
+5. Create a fresh active ledger for the next slice only when execution continues.
+
+The route owns durable knowledge. The ledger owns resumable execution state.
+
+## Route Design
+
+A route is the stable project plan. It should be specific enough to guide hours of work and flexible enough to allow evidence-based pivots.
+
+Always include first closure:
+
+- `Whole Goal`: the full project outcome.
+- `First Autonomous Slice`: the first few-hour closure target.
+- `Stretch Goals`: optional work after first slice validates.
+- `Explicitly Deferred`: work left for later because it is high risk, blocked on external access, or too broad.
+
+Prefer a first slice that:
+
+- Builds or strengthens the validation harness.
+- Exercises a thin vertical path through the system.
+- Locks public/API behavior with tests.
+- Avoids the riskiest unproven implementation until there is a spike or test matrix.
+
+## Validation Surface Map
+
+Map validation surfaces separately from implementation tasks:
+
+- unit tests
+- integration tests
+- contract tests
+- SDK/client compatibility tests
+- benchmarks/profiles/load tests
+- static checks/types/lints
+- logs/metrics/audit assertions
+- screenshots/visual regression checks
+- migration counts or data integrity checks
+- failure-path and rollback tests
+
+If validation is weak, make validation-harness creation part of the first autonomous slice.
+
+## External Freshness
+
+If the task depends on an external API, SDK, protocol, model capability, browser behavior, cloud service, law, price, or standard, require a freshness check before implementation.
+
+Record in the route or ledger:
+
+- source URL or local reference
+- checked date
+- version assumptions
+- observed behavior if tested
+- conflicts with the source spec
+
+When the source spec conflicts with current official docs or actual SDK behavior, do not silently choose. Record the conflict, choose the source of truth for the active slice, and add a stop rule if the choice is product-sensitive.
+
+## Risk Triage
+
+Classify major work areas as:
+
+- `implement now`: clear enough and covered by validation.
+- `spike first`: risky or uncertain; run a prototype/test matrix before committing to implementation.
+- `defer`: useful but outside the first autonomous slice.
+- `ask user`: requires product, business, security, credential, production, or destructive-operation approval.
+
+## Route Template
+
+```markdown
+# Long-Horizon Route: <name>
+
+## Whole Goal
+<Full project outcome, including later phases.>
+
+## First Autonomous Slice
+<The first few-hour closure target. Include what is in, what is out, and what evidence proves it closed.>
+
+## Ledger
+- Path: <planned-ledger-path>
+- Created: no
+- Note: The ledger is created when execution starts, not during evaluate.
+
+## Success Criteria
+- <Metric or acceptance criterion>
+- <Correctness/stability criterion>
+- <Regression criterion>
+
+## Scope
+- <Included area>
+- <Included area>
+
+## Non-Goals
+- <Explicitly excluded work>
+- <External systems or risky changes not required for this route>
+
+## Explicitly Deferred
+- <High-risk phase or feature deferred from the first slice>
+- <External integration or production validation deferred until approval>
+
+## Completed Slices
+| Slice | Status | Summary | Evidence | Key Decisions | Follow-Ups |
+| --- | --- | --- | --- | --- | --- |
+| <slice> | done/deferred/blocked | <summary> | <commands/artifacts> | <decision> | <next work> |
+
+## Durable Findings
+- <Stable finding, verified result, or disproven hypothesis from completed work>
+
+## Guardrails
+- <Compatibility rule>
+- <Data/security/destructive-operation rule>
+- <When to ask the user>
+
+## Current Known Context
+- <What the source document says is already true>
+- <Known completed work>
+- <Known risks or assumptions>
+
+## External Freshness
+| Source | Checked Date | Version / Assumption | Relevant Facts | Conflict |
+| --- | --- | --- | --- | --- |
+| <official docs / SDK / protocol> | <date> | <version> | <fact> | <none or conflict> |
+
+## Validation Surface Map
+| Surface | Purpose | Command / Method | Required For First Slice |
+| --- | --- | --- | --- |
+| unit | <what it proves> | `<command>` | yes/no |
+| contract | <what it proves> | `<command>` | yes/no |
+| compat | <what it proves> | `<command>` | yes/no |
+
+## Evidence Plan
+- Baseline commands:
+  - `<command>`
+- Validation commands:
+  - `<command>`
+- Artifacts to collect:
+  - `<artifact>`
+
+## Risk Triage
+| Area | Classification | Reason | First Action |
+| --- | --- | --- | --- |
+| <area> | implement now / spike first / defer / ask user | <why> | <action> |
+
+## Workstreams
+| ID | Priority | Slice | Workstream | Hypothesis | Validation | Done When | Risk |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| W1 | P0 | first | <baseline/harness> | <why it matters> | <how to test> | <completion definition> | <risk> |
+| W2 | P1 | first/stretch/deferred | <workstream> | <why it might help> | <how to prove/disprove> | <completion definition> | <risk> |
+
+## Execution Rules
+1. Read this route and the source documents.
+2. Create the ledger on execute if it does not exist.
+3. Record git status and branch.
+4. Establish baseline.
+5. Pick the highest-value workstream in the active slice.
+6. Implement the smallest reversible change.
+7. Validate, compare, document, and commit if appropriate.
+8. When a slice closes, consolidate durable findings into this route and archive/reset the ledger.
+
+## Pivot Rules
+- If a hypothesis is disproven, mark it disproven and choose the next best workstream.
+- If a new bottleneck or risk appears, add it to the ledger with evidence before changing direction.
+- If validation is noisy, repeat or narrow the experiment before claiming success.
+- If external docs or SDK behavior conflict with the route, record the conflict and decide whether it is a local implementation detail or a stop-rule issue.
+- If the first slice expands beyond a few-hour closure, defer stretch work and close the verified slice first.
+
+## Git Discipline
+- Inspect `git status` before edits.
+- Never overwrite unrelated user changes.
+- Use a feature branch for multi-hour work when appropriate.
+- Commit by logical phase: baseline, harness, implementation, docs/results.
+- Each commit should be explainable and reversible.
+
+## Stop Rules
+- Stop and ask if a product/business tradeoff is required.
+- Stop and ask before destructive operations, production access, secret handling, or broad rewrites.
+- Stop if the active slice is reached and validation passes.
+- Stop if blocked after reasonable investigation; record attempts and the specific decision needed.
+```
+
+## Ledger Template
+
+Create this only in execute mode. The ledger is the agent's active-slice execution state.
+
+```markdown
+# Long-Horizon Ledger: <name>
+
+## Run State
+- Status: doing
+- Route:
+- Ledger Scope: active slice working memory only
+- Current branch:
+- Current commit:
+- Active slice:
+- Active workstream:
+- Last updated:
+
+## Bounds
+- Keep only information needed to resume the active slice.
+- Move durable findings/results/decisions into the route when stable.
+- Archive or reset this ledger when the active slice closes.
+
+## Task Board
+| ID | Status | Slice | Task | Evidence Needed | Result |
+| --- | --- | --- | --- | --- | --- |
+
+## Validation Surface Status
+| Surface | Status | Command / Method | Last Result | Artifact |
+| --- | --- | --- | --- | --- |
+
+## Experiment Log
+| Time | Hypothesis | Command / Method | Before | After | Conclusion | Artifact |
+| --- | --- | --- | --- | --- | --- | --- |
+
+## Decision Log
+| Time | Decision | Evidence | Tradeoff | Reversal |
+| --- | --- | --- | --- | --- |
+
+## Change Log
+| Commit | Summary | Validation | Risk |
+| --- | --- | --- | --- |
+
+## Discoveries
+- <New fact, bottleneck, risk, or disproven assumption>
+
+## External Spec Checks
+| Time | Source | Version / Date | Finding | Conflict / Action |
+| --- | --- | --- | --- | --- |
+
+## Blockers
+- <Blocker, attempts, and required user input>
+
+## Next Actions
+1. <Next concrete action>
+2. <Next concrete action>
+
+## Consolidation Checklist
+- Durable findings copied to route.
+- Completed slice summary added to route.
+- Evidence and artifacts linked from route.
+- Deferred or next-slice work updated in route.
+- Ledger archived or reset if active slice is closed.
+```
+
+## Quality Checks
+
+Before finalizing evaluate mode:
+
+- The suitability decision is explicit.
+- Unsuitable tasks include actionable reasons.
+- Suitable tasks have a route file but no execution ledger yet.
+- Large suitable tasks have a first autonomous slice, stretch goals, and explicit deferrals.
+- External specs include freshness/version assumptions when relevant.
+- Risky areas are marked implement now / spike first / defer / ask user.
+- Validation surfaces are mapped independently from implementation steps.
+- The route document is not a rigid implementation checklist.
+- The user is told how to start in one short sentence.
+
+Before finalizing execute or continue mode:
+
+- The ledger exists and reflects current state.
+- The route remains the source of strategy; the ledger remains the source of execution state.
+- The ledger is bounded to active-slice working memory.
+- Closed slice findings/results/decisions are consolidated into the route.
+- If a slice closed, the ledger is archived or reset before starting another slice.
+- Claims are backed by repeatable evidence.
+- Stop rules cover user approval, destructive actions, product tradeoffs, and validation failure.

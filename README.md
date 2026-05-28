@@ -8,6 +8,7 @@ These skills help you think through problems before writing code.
 
 - **write-a-prd** — Create a PRD through an interactive interview, codebase exploration, and module design. Filed as a GitHub issue.
 - **grill-me** — Get relentlessly interviewed about a plan or design until every branch of the decision tree is resolved.
+- **long-horizon-work** — Convert large coding goals into measurable long-running autonomous work packages with validation, guardrails, and launch prompts.
 
 ## Development
 
@@ -20,6 +21,11 @@ These skills help you write, refactor, and fix code.
 
 - **setup-pre-commit** — Set up Husky pre-commit hooks with lint-staged, Prettier, type checking, and tests.
 - **git-guardrails-claude-code** — Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, etc.) before they execute.
+
+## Research & Feeds
+
+- **paper-digest** — Fetch, filter, summarize, and optionally publish recent AI/ML paper digests.
+- **x-feed-capture** — Capture, filter, summarize, and optionally publish high-value X/Twitter feed updates.
 
 ## Writing Skills
 
