@@ -18,7 +18,7 @@ This workflow requires local browser automation and, when publishing, Lark/Feish
 Required for capture:
 
 - Kimi WebBridge or a protocol-compatible local bridge running on `KIMI_WEBBRIDGE_URL`.
-- A browser extension connected to that bridge and logged into X.
+- A browser extension connected to that bridge and logged into X, ideally in the user's normal Chrome profile so the real authenticated Following feed is reused.
 - An agent skill or local documentation for the bridge, such as `kimi-webbridge` or `qweb-bridge`.
 
 Required for publishing:
@@ -71,6 +71,91 @@ LARK_NOTIFY_CHAT_ID="${LARK_NOTIFY_CHAT_ID:-}"
 
 If a required value is missing, ask the user for that value or where to find local config. Never substitute a private value from a public skill file.
 
+If `~/.config/x-feed-capture/config.env` is missing and the user did not explicitly ask for a dry run, do **not** silently continue without publishing. Treat this as a bootstrap gap and proactively guide the user through creating durable config before capture proceeds.
+
+### Lark target bootstrap
+
+When publishing is requested and `LARK_DOC_TOKEN`, `LARK_DOC_ANCHOR_BLOCK_ID`, or `LARK_NOTIFY_CHAT_ID` is missing, guide the user through a one-time bootstrap with `lark-cli` instead of guessing IDs.
+
+Preferred agent behavior when the durable config file is missing:
+
+1. Tell the user the publish target is not configured yet.
+2. Point them to the bundled bootstrap helper first, instead of only describing the manual flow.
+3. Offer or run the helper with concrete arguments when the document URL, anchor text, or chat name is already known from local context or the prompt.
+4. Only fall back to a dry run if the user explicitly asks for dry run behavior or declines bootstrap for now.
+
+If this skill is available locally, prefer the bundled bootstrap helper:
+
+```bash
+/Users/axel/Work/skills/x-feed-capture/bin/bootstrap-x-feed-lark-targets.sh --help
+```
+
+Recommended acquisition flow:
+
+1. **Document token**
+   - Easiest path: ask the user for the destination document URL and extract the token from `/docx/<token>` or `/wiki/<token>`.
+   - If the document does not exist yet, create it first with `lark-cli docs +create --api-version v2`, then record the returned `document_id` as `LARK_DOC_TOKEN`.
+
+2. **Anchor block ID**
+   - Fetch the document with block IDs:
+
+   ```bash
+   lark-cli docs +fetch --api-version v2 \
+     --doc "$LARK_DOC_TOKEN" \
+     --detail with-ids
+   ```
+
+   - Choose a stable insertion anchor near the top of the document, such as a fixed heading or intro paragraph, and record that block's `id="blk..."` as `LARK_DOC_ANCHOR_BLOCK_ID`.
+   - Prefer a dedicated heading like `X Feed` or `Latest Captures` over anchoring to a frequently edited paragraph.
+
+3. **Notify chat ID**
+   - If notifications are desired, locate the target chat by name:
+
+   ```bash
+   lark-cli im +chat-search --as user --query "chat name"
+   ```
+
+   - Record the returned `chat_id` (`oc_...`) as `LARK_NOTIFY_CHAT_ID`.
+   - If the exact name is unclear, start with `lark-cli im +chat-list --as user` and narrow from there.
+
+Initialization guidance:
+
+- Do the bootstrap under `--as user` unless the destination document/chat is explicitly bot-owned.
+- If the user has not completed user authorization yet, run `lark-cli auth login --scope "docx:document:readonly docx:document:write_only im:chat:read im:message:send_as_user" --no-wait --json`, surface the verification URL, and resume after authorization completes.
+- After collecting the three values, immediately validate them with a dry run or read call before the first production capture.
+
+Recommended validation:
+
+```bash
+lark-cli docs +fetch --api-version v2 --as user --doc "$LARK_DOC_TOKEN" --detail with-ids
+lark-cli im +chat-search --as user --query "expected chat name"
+```
+
+Storage recommendation:
+
+- Do **not** treat these values as cache entries and do **not** put them under `~/.cache`; they are durable user configuration, not disposable runtime artifacts.
+- Do **not** write them into automation memory markdown.
+- Prefer a dedicated per-user config file such as `~/.config/x-feed-capture/config.env` with file mode `600`.
+- Keep the file as simple shell env syntax so the automation can source it:
+
+```bash
+mkdir -p ~/.config/x-feed-capture
+cat > ~/.config/x-feed-capture/config.env <<'EOF'
+LARK_DOC_TOKEN=doxcnxxxxxxxxxxxx
+LARK_DOC_ANCHOR_BLOCK_ID=blkcnxxxxxxxxxxxx
+LARK_NOTIFY_CHAT_ID=oc_xxxxxxxxxxxx
+EOF
+chmod 600 ~/.config/x-feed-capture/config.env
+```
+
+- Before running the workflow, source that file if it exists:
+
+```bash
+[ -f ~/.config/x-feed-capture/config.env ] && . ~/.config/x-feed-capture/config.env
+```
+
+If the user manages multiple destinations, keep one env file per destination, for example `~/.config/x-feed-capture/prod.env` and `~/.config/x-feed-capture/test.env`, and choose explicitly before running the capture.
+
 ## Workflow
 
 ### 1. Run dependency preflight
@@ -78,6 +163,30 @@ If a required value is missing, ask the user for that value or where to find loc
 Verify the bridge skill, bridge daemon, browser extension connection, and Lark tooling before doing work with side effects.
 
 If the bridge is missing or unhealthy, install or start it first. If publishing is requested but `lark-cli` or required Lark skills are missing, install and authenticate Lark first. If the user only wants a dry run, Lark can be skipped.
+
+Before moving on, explicitly check whether durable publish config is present:
+
+```bash
+[ -f ~/.config/x-feed-capture/config.env ] && . ~/.config/x-feed-capture/config.env
+printf 'doc=%s\nanchor=%s\nchat=%s\n' "${LARK_DOC_TOKEN:-}" "${LARK_DOC_ANCHOR_BLOCK_ID:-}" "${LARK_NOTIFY_CHAT_ID:-}"
+```
+
+If the file is missing, or `LARK_DOC_TOKEN` / `LARK_DOC_ANCHOR_BLOCK_ID` is empty, pause the capture workflow and bootstrap first unless the user explicitly requested a dry run. Prefer this helper:
+
+```bash
+/Users/axel/Work/skills/x-feed-capture/bin/bootstrap-x-feed-lark-targets.sh --help
+```
+
+If you already know enough inputs, run the helper directly instead of stopping at `--help`. For example:
+
+```bash
+/Users/axel/Work/skills/x-feed-capture/bin/bootstrap-x-feed-lark-targets.sh \
+  --doc-url "https://example.feishu.cn/docx/..." \
+  --anchor-text "X Feed" \
+  --chat-name "AI Digest"
+```
+
+Do not discover missing config, continue with capture, and only mention bootstrap afterward. Missing durable config is an actionable setup task that should be surfaced immediately.
 
 ### 2. Check the browser bridge
 
@@ -108,9 +217,17 @@ LAST_HREF=https://x.com/<user>/status/<id>
 
 Use `LAST_TIME` and `LAST_HREF` to avoid duplicate posts. Missing state means this is the first run.
 
-### 4. Open X Following and keep the tab ID
+### 4. Open or reuse the real X Following tab
 
-Navigate to X in a dedicated session and record the returned `tabId`:
+Prefer reusing an already-open X tab in the user's real browser session, especially when the user says to use Chrome, the current tab, or an existing X window:
+
+```bash
+curl -s -X POST "$KIMI_WEBBRIDGE_URL/command" \
+  -H 'Content-Type: application/json' \
+  -d '{"action":"find_tab","args":{"url":"https://x.com/home","active":true},"session":"x-feed"}'
+```
+
+If `find_tab` reports no open match, open a dedicated X tab:
 
 ```bash
 curl -s -X POST "$KIMI_WEBBRIDGE_URL/command" \
@@ -125,8 +242,9 @@ After switching, confirm:
 - `location.href` is on X home.
 - The `Following` tab has `aria-selected="true"`.
 - The visible timeline is not a login page.
+- The page is showing the user's normal feed cards, not only a repeated top-of-feed viewport.
 
-If a `See new posts` button is visible, click it before extraction. All later bridge commands must include the same `tabId`.
+If a `See new posts` button is visible, click it before extraction. Keep all later bridge commands in the same bridge session.
 
 ### 5. Scroll and extract posts
 
@@ -136,11 +254,22 @@ Loop through scroll/extract rounds until one of these conditions is met:
 - 80 scroll rounds have run.
 - Eight consecutive extraction rounds produced no new status links and scroll position is still changing.
 
-Use about `700-900px` per scroll with a short wait between rounds. Extract visible `article[role=article]` elements, choose the first canonical link matching `https://x.com/<user>/status/<id>` exactly, and ignore `/analytics`, `/photo/`, `/video/`, and quoted-post media sublinks.
+Prefer absolute-position scrolling over tiny incremental `scrollBy` steps. X's virtual timeline often re-renders the same visible cards if the agent only nudges the viewport.
+
+Recommended pattern:
+
+- Scroll to absolute Y positions in larger jumps, such as `0`, `1600`, `3200`, `4800`, ...
+- Wait about `2.0-3.0s` after each jump so X has time to hydrate the next batch.
+- After each round, record both `window.scrollY` and `document.body.scrollHeight`.
+- Treat increasing `document.body.scrollHeight` as evidence that the timeline is actually loading deeper content.
+
+If `scrollY` changes but the visible canonical status links barely change for several rounds, do not assume the feed is exhausted yet. First try deeper absolute jumps and longer waits. In practice, this is often the difference between collecting only a handful of links and collecting a full feed slice.
+
+Extract visible `article[role=article]` elements, choose the first canonical link matching `https://x.com/<user>/status/<id>` exactly, and ignore `/analytics`, `/photo/`, `/video/`, and quoted-post media sublinks.
 
 Deduplicate by canonical `href`. Keep raw extraction separate from final digest text.
 
-Do not stop early just because a few rounds produced no new status links. X uses a virtual list and sometimes repeats the same visible articles while new content is loading.
+Do not stop early just because a few rounds produced no new status links. X uses a virtual list and sometimes repeats the same visible articles while new content is loading. Ads may also occupy article slots; skip them and continue scrolling instead of treating them as evidence that extraction failed.
 
 ### 6. Enrich candidate details
 

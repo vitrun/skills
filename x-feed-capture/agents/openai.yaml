@@ -1,4 +1,0 @@
-interface:
-  display_name: "X Feed Capture"
-  short_description: "Capture and curate high-value X feed posts"
-  default_prompt: "Use $x-feed-capture to collect high-value AI and technology posts from X and publish a digest."

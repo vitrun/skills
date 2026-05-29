@@ -22,6 +22,16 @@ These skills help you write, refactor, and fix code.
 - **setup-pre-commit** — Set up Husky pre-commit hooks with lint-staged, Prettier, type checking, and tests.
 - **git-guardrails-claude-code** — Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, etc.) before they execute.
 
+## Vendored Skills
+
+External skills are tracked in `vendor-skills.toml` and copied into this repository with:
+
+```bash
+python3 scripts/update-vendor-skills.py
+```
+
+The script sparse-checks out only the configured upstream paths, syncs them into local skill directories, and writes `.vendor-skills.lock` with the upstream commit used for each import. Review the resulting diff before committing updates.
+
 ## Research & Feeds
 
 - **paper-digest** — Fetch, filter, summarize, and optionally publish recent AI/ML paper digests.

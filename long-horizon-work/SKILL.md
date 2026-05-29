@@ -7,6 +7,8 @@ description: Assess, start, and continue long-running autonomous coding work. Us
 
 Use this skill as the workflow for long-running autonomous coding tasks. Match the user's language in outputs.
 
+Long-horizon work has a default git discipline: choose a commit cadence that fits the route, and before every commit run a review-fix loop until issues converge. Do this even when the user does not explicitly ask for it.
+
 Choose the mode from the request:
 
 - `evaluate`: assess a goal/spec and, if suitable, produce a route document. Do not create a ledger yet.
@@ -67,6 +69,8 @@ If working in a repo or file-producing context, write only the route file during
 
 Do not create the ledger during evaluate. The ledger belongs to execution state and should be created only when `execute` starts. The route may name the planned ledger path.
 
+The route must include a `Commit Plan` that chooses a cadence, names commit boundaries, and requires the pre-commit review-fix loop.
+
 In `How To Start`, tell the user simply:
 
 ```text
@@ -83,9 +87,10 @@ Steps:
 2. Read the route and relevant source/spec if referenced.
 3. Inspect `git status`.
 4. Create the ledger at the path specified by the route. If no path is specified, create a sibling file named like `<route-name>-ledger.md`.
-5. Initialize the ledger as working memory for the active slice with run state, task board, validation surface status, experiment log, decision log, change log, discoveries, blockers, and next actions.
-6. Execute the first autonomous slice from the route.
-7. Work in evidence-driven cycles:
+5. Initialize the ledger as working memory for the active slice with run state, task board, validation surface status, experiment log, decision log, change log, commit plan, review-fix log, discoveries, blockers, and next actions.
+6. Choose and record the commit cadence for the active slice if the route does not already specify one; backfill the route's `Commit Plan` and ledger `Commit Plan` for older routes.
+7. Execute the first autonomous slice from the route.
+8. Work in evidence-driven cycles:
    - choose the highest-value executable task;
    - state the hypothesis and done condition in the ledger;
    - establish or reuse baseline;
@@ -93,9 +98,10 @@ Steps:
    - run validation;
    - compare before/after behavior;
    - update the ledger;
-   - commit logically when validated and appropriate.
-8. When the active slice closes, consolidate durable results into the route, then archive or reset the ledger for the next slice.
-9. Stop only when a stop rule triggers, the active slice closes, or the user interrupts.
+   - run the review-fix loop before any commit;
+   - commit logically when validated and review-clean.
+9. When the active slice closes, consolidate durable results into the route, then archive or reset the ledger for the next slice.
+10. Stop only when a stop rule triggers, the active slice closes, or the user interrupts.
 
 Use the route as the execution plan.
 
@@ -116,8 +122,9 @@ Steps:
 3. Read route and ledger before relying on any chat memory.
 4. Inspect `git status` and recent commits.
 5. Resume the highest-value unblocked task in the active slice.
-6. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
-7. Continue the same evidence-driven cycle as execute mode.
+6. Resume or choose the commit cadence for the active slice, backfill older route/ledger files if needed, and preserve any pending review-fix state from the ledger.
+7. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
+8. Continue the same evidence-driven cycle as execute mode.
 
 If the ledger is missing, do not invent prior state. Treat this as `execute` from the route and create a fresh ledger, noting that prior execution state was unavailable.
 
@@ -139,6 +146,45 @@ At the end of each slice, run consolidation:
 5. Create a fresh active ledger for the next slice only when execution continues.
 
 The route owns durable knowledge. The ledger owns resumable execution state.
+
+## Commit Cadence And Standards
+
+Every route should include a commit plan. If the user asks the agent to choose the cadence, choose it without asking.
+
+Pick the smallest cadence that keeps history reviewable and reversible:
+
+- `per validated workstream`: default for most multi-hour routes; commit when a Wxx workstream or coherent sub-workstream is validated and documented.
+- `per vertical slice`: use when several Wxx items must land together to produce a working behavior.
+- `per harness/baseline then implementation`: use when validation infrastructure must be separated from behavior changes.
+- `spike branch only`: use for uncertain experiments; commit only if the spike result is worth preserving, otherwise record findings and discard or isolate the experiment.
+
+Do not commit broken or purely transitional states unless the route explicitly needs an archival spike commit. Avoid broad mixed commits. A good commit has one clear purpose, includes matching tests/docs when needed, and can be reverted without unrelated fallout.
+
+Before committing:
+
+1. Inspect `git status` and `git diff`.
+2. Confirm the diff matches the intended workstream and excludes unrelated user changes.
+3. Run the route's required validation for the changed surface.
+4. Run the review-fix loop below.
+5. Record the commit hash, summary, validation, and residual risk in the ledger after the commit succeeds.
+
+Use concise imperative commit messages. Include a scope when it helps, for example `skift: add status drift detection`.
+
+## Review-Fix Loop
+
+Run this loop before every commit and when closing a slice.
+
+1. Review the diff as a code reviewer, prioritizing correctness, regressions, data loss, security/privacy, public API/UX drift, missing validation, and maintainability.
+2. Classify findings as:
+   - `must-fix`: correctness, regression, data-loss, security/privacy, unsupported public behavior, or failing validation.
+   - `should-fix`: plausible edge case, confusing UX, weak test coverage, or maintainability issue within the active scope.
+   - `record/defer`: real but outside the active slice, low-risk polish, or blocked by a user/product decision.
+3. Fix all `must-fix` and in-scope `should-fix` findings.
+4. Re-run targeted validation after fixes.
+5. Repeat review and fix until a full review pass finds no `must-fix` issues and no in-scope `should-fix` issues.
+6. Record deferred findings in the ledger and, if durable, the route.
+
+Convergence means one clean review pass after the latest fix. If the same issue class persists after repeated attempts, stop only when a stop rule applies or a user/product decision is genuinely required; otherwise keep narrowing and fixing.
 
 ## Route Design
 
@@ -280,6 +326,13 @@ Classify major work areas as:
 | W1 | P0 | first | <baseline/harness> | <why it matters> | <how to test> | <completion definition> | <risk> |
 | W2 | P1 | first/stretch/deferred | <workstream> | <why it might help> | <how to prove/disprove> | <completion definition> | <risk> |
 
+## Commit Plan
+- Cadence: <per validated workstream / per vertical slice / per harness then implementation / spike branch only>
+- Commit boundaries:
+  - <boundary and validation required before commit>
+- Commit standard: each commit is review-clean, validated, logically reversible, and excludes unrelated user changes.
+- Pre-commit review-fix loop: required; repeat until no must-fix or in-scope should-fix findings remain.
+
 ## Execution Rules
 1. Read this route and the source documents.
 2. Create the ledger on execute if it does not exist.
@@ -287,7 +340,7 @@ Classify major work areas as:
 4. Establish baseline.
 5. Pick the highest-value workstream in the active slice.
 6. Implement the smallest reversible change.
-7. Validate, compare, document, and commit if appropriate.
+7. Validate, compare, document, run review-fix to convergence, and commit if review-clean.
 8. When a slice closes, consolidate durable findings into this route and archive/reset the ledger.
 
 ## Pivot Rules
@@ -303,6 +356,8 @@ Classify major work areas as:
 - Use a feature branch for multi-hour work when appropriate.
 - Commit by logical phase: baseline, harness, implementation, docs/results.
 - Each commit should be explainable and reversible.
+- Before each commit, inspect the full diff, run required validation, and run review-fix until findings converge.
+- Do not commit while `must-fix` or in-scope `should-fix` findings remain.
 
 ## Stop Rules
 - Stop and ask if a product/business tradeoff is required.
@@ -353,6 +408,15 @@ Create this only in execute mode. The ledger is the agent's active-slice executi
 | Commit | Summary | Validation | Risk |
 | --- | --- | --- | --- |
 
+## Commit Plan
+- Cadence:
+- Next commit boundary:
+- Required validation before commit:
+
+## Review-Fix Log
+| Time | Review Pass | Findings | Fixes Applied | Validation After Fix | Converged |
+| --- | --- | --- | --- | --- | --- |
+
 ## Discoveries
 - <New fact, bottleneck, risk, or disproven assumption>
 
@@ -386,6 +450,7 @@ Before finalizing evaluate mode:
 - External specs include freshness/version assumptions when relevant.
 - Risky areas are marked implement now / spike first / defer / ask user.
 - Validation surfaces are mapped independently from implementation steps.
+- Commit cadence, boundaries, and review-fix requirements are explicit.
 - The route document is not a rigid implementation checklist.
 - The user is told how to start in one short sentence.
 
@@ -397,4 +462,5 @@ Before finalizing execute or continue mode:
 - Closed slice findings/results/decisions are consolidated into the route.
 - If a slice closed, the ledger is archived or reset before starting another slice.
 - Claims are backed by repeatable evidence.
+- Each commit is preceded by a converged review-fix loop, or the reason no commit was made is recorded.
 - Stop rules cover user approval, destructive actions, product tradeoffs, and validation failure.

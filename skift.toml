@@ -1,0 +1,15 @@
+version = 1
+
+[[skills]]
+name = "redesign-skill"
+repo = "git@github.com:Leonxlnx/taste-skill.git"
+path = "skills/redesign-skill"
+ref = "main"
+mode = "guarded"
+
+[[skills]]
+name = "taste-skill"
+repo = "git@github.com:Leonxlnx/taste-skill.git"
+path = "skills/taste-skill"
+ref = "main"
+mode = "guarded"

@@ -1,0 +1,19 @@
+version = 1
+
+[[skills]]
+name = "redesign-skill"
+repo = "git@github.com:Leonxlnx/taste-skill.git"
+path = "skills/redesign-skill"
+ref = "main"
+commit = "3c7017d636c3a4aad378433ea6d0cfa6c921da4a"
+updated_at = "2026-05-29T09:44:17Z"
+content_hash = "sha256:18f6819f29dea3d4c6dee48c0fd19a34781dee75586ba6f831330117a9de1f2a"
+
+[[skills]]
+name = "taste-skill"
+repo = "git@github.com:Leonxlnx/taste-skill.git"
+path = "skills/taste-skill"
+ref = "main"
+commit = "3c7017d636c3a4aad378433ea6d0cfa6c921da4a"
+updated_at = "2026-05-29T09:47:33Z"
+content_hash = "sha256:2d54b8d2b7b42dc9c23c02c6b71a81ea118d76fc3d1a9ccfe46081031507a26d"
