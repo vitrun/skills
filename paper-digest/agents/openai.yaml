@@ -1,4 +1,4 @@
 interface:
   display_name: "Paper Digest"
-  short_description: "Fetch, publish, and notify AI paper digests"
-  default_prompt: "Use $paper-digest to fetch recent AI papers, format a concise digest, publish it when requested, and notify the result."
+  short_description: "Fetch, onboard, publish, and notify AI paper digests"
+  default_prompt: "Use $paper-digest to fetch recent AI papers, bootstrap missing Lark targets when needed, publish configured digests, and notify the result."
