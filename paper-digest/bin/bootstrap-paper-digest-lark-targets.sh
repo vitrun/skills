@@ -11,6 +11,7 @@ Usage:
 
 Options:
   --doc-url URL            Existing docx/wiki URL to use as destination.
+                           Saved as PAPER_DIGEST_DOC_URL for notifications.
   --doc-token TOKEN        Existing document token to use as destination.
   --create-doc             Create a new destination document.
   --doc-title TITLE        Title to use with --create-doc. Default: Paper Digest
@@ -294,6 +295,9 @@ mkdir -p "$(dirname "$OUTPUT_PATH")"
 {
   printf 'PAPER_DIGEST_FETCH_SCRIPT=%q\n' "$DEFAULT_FETCH_SCRIPT"
   printf 'PAPER_DIGEST_DOC_TOKEN=%q\n' "$DOC_TOKEN"
+  if [[ -n "$DOC_URL" ]]; then
+    printf 'PAPER_DIGEST_DOC_URL=%q\n' "$DOC_URL"
+  fi
   printf 'PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID=%q\n' "$ANCHOR_ID"
   printf 'PAPER_DIGEST_DOC_AS=%q\n' "$IDENTITY"
   printf 'PAPER_DIGEST_NOTIFY_AS=%q\n' "$NOTIFY_AS"
@@ -313,6 +317,15 @@ Saved:
 Resolved values:
   PAPER_DIGEST_FETCH_SCRIPT=$DEFAULT_FETCH_SCRIPT
   PAPER_DIGEST_DOC_TOKEN=<saved>
+EOF
+
+if [[ -n "$DOC_URL" ]]; then
+  echo "  PAPER_DIGEST_DOC_URL=<saved>"
+else
+  echo "  PAPER_DIGEST_DOC_URL=<unset>"
+fi
+
+cat <<EOF
   PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID=<saved>
   PAPER_DIGEST_DOC_AS=$IDENTITY
   PAPER_DIGEST_NOTIFY_AS=$NOTIFY_AS

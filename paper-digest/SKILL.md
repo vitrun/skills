@@ -64,6 +64,7 @@ Use these variables:
 ```bash
 PAPER_DIGEST_FETCH_SCRIPT="${PAPER_DIGEST_FETCH_SCRIPT:-paper-digest/scripts/fetch-alphaxiv-hot.py}"
 PAPER_DIGEST_DOC_TOKEN="${PAPER_DIGEST_DOC_TOKEN:-}"
+PAPER_DIGEST_DOC_URL="${PAPER_DIGEST_DOC_URL:-}"
 PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID="${PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID:-}"
 PAPER_DIGEST_DOC_AS="${PAPER_DIGEST_DOC_AS:-user}"
 PAPER_DIGEST_NOTIFY_CHAT_ID="${PAPER_DIGEST_NOTIFY_CHAT_ID:-}"
@@ -76,6 +77,7 @@ Do not depend on `~/tasks`, `/Users/.../Work/tasks`, or any private runner. If `
 For publish, scheduled, or automation runs, require:
 
 - `PAPER_DIGEST_DOC_TOKEN`
+- `PAPER_DIGEST_DOC_URL`
 - `PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID`
 - `PAPER_DIGEST_NOTIFY_CHAT_ID`, unless the user explicitly says to skip notification
 
@@ -83,7 +85,7 @@ If any required value is missing, do not silently generate a local-only digest a
 
 ### Lark target bootstrap
 
-When publishing is requested and `PAPER_DIGEST_DOC_TOKEN`, `PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID`, or `PAPER_DIGEST_NOTIFY_CHAT_ID` is missing, use the bundled helper to acquire and persist the values:
+When publishing is requested and `PAPER_DIGEST_DOC_TOKEN`, `PAPER_DIGEST_DOC_URL`, `PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID`, or `PAPER_DIGEST_NOTIFY_CHAT_ID` is missing, use the bundled helper to acquire and persist the values:
 
 ```bash
 paper-digest/bin/bootstrap-paper-digest-lark-targets.sh --help
@@ -108,6 +110,7 @@ paper-digest/bin/bootstrap-paper-digest-lark-targets.sh \
 The helper:
 
 - extracts a doc token from an existing docx/wiki URL or creates a new doc;
+- stores the destination document URL for notifications;
 - fetches the document with block IDs and resolves a stable insertion anchor;
 - searches a notify chat by name or accepts an explicit `oc_...` chat ID;
 - writes `~/.config/paper-digest/config.env` with file mode `600`;
@@ -116,8 +119,8 @@ The helper:
 Manual acquisition flow when not using the helper:
 
 1. **Document token**
-   - Ask for the destination document URL and extract the token from `/docx/<token>` or `/wiki/<token>`.
-   - If needed, create a destination with `lark-cli docs +create --api-version v2`.
+   - Ask for the destination document URL, save it as `PAPER_DIGEST_DOC_URL`, and extract the token from `/docx/<token>` or `/wiki/<token>`.
+   - If needed, create a destination with `lark-cli docs +create --api-version v2`; if no URL is returned, ask the user for the final browser URL before enabling notifications.
 
 2. **Anchor block ID**
    - Fetch block IDs:
@@ -147,6 +150,7 @@ mkdir -p ~/.config/paper-digest
 cat > ~/.config/paper-digest/config.env <<'EOF'
 PAPER_DIGEST_FETCH_SCRIPT=/path/to/paper-digest/scripts/fetch-alphaxiv-hot.py
 PAPER_DIGEST_DOC_TOKEN=doxcnxxxxxxxxxxxx
+PAPER_DIGEST_DOC_URL=https://example.feishu.cn/wiki/doxcnxxxxxxxxxxxx
 PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID=blkcnxxxxxxxxxxxx
 PAPER_DIGEST_DOC_AS=user
 PAPER_DIGEST_NOTIFY_CHAT_ID=oc_xxxxxxxxxxxx
@@ -164,9 +168,10 @@ Before fetching papers, load durable config and check whether this run is suppos
 ```bash
 PAPER_DIGEST_CONFIG="${PAPER_DIGEST_CONFIG:-$HOME/.config/paper-digest/config.env}"
 [ -f "$PAPER_DIGEST_CONFIG" ] && . "$PAPER_DIGEST_CONFIG"
-printf 'fetch=%s\ndoc=%s\nanchor=%s\nchat=%s\n' \
+printf 'fetch=%s\ndoc=%s\nurl=%s\nanchor=%s\nchat=%s\n' \
   "${PAPER_DIGEST_FETCH_SCRIPT:-}" \
   "${PAPER_DIGEST_DOC_TOKEN:-}" \
+  "${PAPER_DIGEST_DOC_URL:-}" \
   "${PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID:-}" \
   "${PAPER_DIGEST_NOTIFY_CHAT_ID:-}"
 ```
@@ -262,6 +267,7 @@ When the user asks to publish, or this is a scheduled/automation run, require co
 
 ```bash
 : "${PAPER_DIGEST_DOC_TOKEN:?set destination document token}"
+: "${PAPER_DIGEST_DOC_URL:?set destination document URL}"
 : "${PAPER_DIGEST_DOC_ANCHOR_BLOCK_ID:?set destination anchor block id}"
 ```
 
@@ -306,19 +312,19 @@ lark-cli im +messages-send \
   --text "Paper Digest: success
 Window: 7 Days
 Published: 5
-Destination: configured Feishu doc"
+Document: $PAPER_DIGEST_DOC_URL"
 ```
 
 Implement the workflow with `try/finally`, shell `trap`, or equivalent control flow so notification is attempted even after fetch, filter, format, or publish failures. Capture the original failure first; if notification also fails, report both the original failure and the notification failure locally.
 
-Notification content must not include private document tokens, raw access tokens, app secrets, full local paths, or personal identifiers. Prefer this shape:
+Notification content must not include raw access tokens, app secrets, full local paths, or personal identifiers. Every notification must include the configured document link. Prefer this shape:
 
 ```text
 Paper Digest: success
 Window: 7 Days
 Fetched: 20
 Published: 16
-Destination: configured Feishu doc
+Document: https://example.feishu.cn/wiki/...
 ```
 
 ```text
@@ -326,6 +332,7 @@ Paper Digest: failed
 Step: publish
 Reason: missing PAPER_DIGEST_DOC_TOKEN
 Action: run bin/bootstrap-paper-digest-lark-targets.sh and rerun
+Document: https://example.feishu.cn/wiki/...
 ```
 
 ## Public Repo Hygiene

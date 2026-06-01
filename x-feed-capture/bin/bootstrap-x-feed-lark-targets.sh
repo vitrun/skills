@@ -11,6 +11,7 @@ Usage:
 
 Options:
   --doc-url URL            Existing docx/wiki URL to use as destination.
+                           Saved as LARK_DOC_URL for notifications.
   --doc-token TOKEN        Existing document token to use as destination.
   --create-doc             Create a new destination document.
   --doc-title TITLE        Title to use with --create-doc. Default: X Feed
@@ -282,6 +283,9 @@ mkdir -p "$(dirname "$OUTPUT_PATH")"
 
 {
   printf 'LARK_DOC_TOKEN=%s\n' "$DOC_TOKEN"
+  if [[ -n "$DOC_URL" ]]; then
+    printf 'LARK_DOC_URL=%s\n' "$DOC_URL"
+  fi
   printf 'LARK_DOC_ANCHOR_BLOCK_ID=%s\n' "$ANCHOR_ID"
   if [[ -n "$NOTIFY_CHAT_ID" ]]; then
     printf 'LARK_NOTIFY_CHAT_ID=%s\n' "$NOTIFY_CHAT_ID"
@@ -298,6 +302,15 @@ Saved:
 
 Resolved values:
   LARK_DOC_TOKEN=$DOC_TOKEN
+EOF
+
+if [[ -n "$DOC_URL" ]]; then
+  printf '  LARK_DOC_URL=%s\n' "$DOC_URL"
+else
+  echo "  LARK_DOC_URL=<unset>"
+fi
+
+cat <<EOF
   LARK_DOC_ANCHOR_BLOCK_ID=$ANCHOR_ID
 EOF
 

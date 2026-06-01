@@ -65,6 +65,7 @@ Use these names when available:
 KIMI_WEBBRIDGE_URL="${KIMI_WEBBRIDGE_URL:-http://127.0.0.1:10086}"
 X_FEED_STATE_FILE="${X_FEED_STATE_FILE:-$HOME/.x_feed_last_fetch}"
 LARK_DOC_TOKEN="${LARK_DOC_TOKEN:?set the destination document token}"
+LARK_DOC_URL="${LARK_DOC_URL:?set the destination document URL for notifications}"
 LARK_DOC_ANCHOR_BLOCK_ID="${LARK_DOC_ANCHOR_BLOCK_ID:?set the block to insert after}"
 LARK_NOTIFY_CHAT_ID="${LARK_NOTIFY_CHAT_ID:-}"
 ```
@@ -75,7 +76,7 @@ If `~/.config/x-feed-capture/config.env` is missing and the user did not explici
 
 ### Lark target bootstrap
 
-When publishing is requested and `LARK_DOC_TOKEN`, `LARK_DOC_ANCHOR_BLOCK_ID`, or `LARK_NOTIFY_CHAT_ID` is missing, guide the user through a one-time bootstrap with `lark-cli` instead of guessing IDs.
+When publishing is requested and `LARK_DOC_TOKEN`, `LARK_DOC_URL`, `LARK_DOC_ANCHOR_BLOCK_ID`, or `LARK_NOTIFY_CHAT_ID` is missing, guide the user through a one-time bootstrap with `lark-cli` instead of guessing IDs.
 
 Preferred agent behavior when the durable config file is missing:
 
@@ -93,8 +94,8 @@ If this skill is available locally, prefer the bundled bootstrap helper:
 Recommended acquisition flow:
 
 1. **Document token**
-   - Easiest path: ask the user for the destination document URL and extract the token from `/docx/<token>` or `/wiki/<token>`.
-   - If the document does not exist yet, create it first with `lark-cli docs +create --api-version v2`, then record the returned `document_id` as `LARK_DOC_TOKEN`.
+   - Easiest path: ask the user for the destination document URL, save it as `LARK_DOC_URL`, and extract the token from `/docx/<token>` or `/wiki/<token>`.
+   - If the document does not exist yet, create it first with `lark-cli docs +create --api-version v2`, then record the returned `document_id` as `LARK_DOC_TOKEN`; if no URL is returned, ask the user for the final browser URL before enabling notifications.
 
 2. **Anchor block ID**
    - Fetch the document with block IDs:
@@ -142,6 +143,7 @@ Storage recommendation:
 mkdir -p ~/.config/x-feed-capture
 cat > ~/.config/x-feed-capture/config.env <<'EOF'
 LARK_DOC_TOKEN=doxcnxxxxxxxxxxxx
+LARK_DOC_URL=https://example.feishu.cn/wiki/doxcnxxxxxxxxxxxx
 LARK_DOC_ANCHOR_BLOCK_ID=blkcnxxxxxxxxxxxx
 LARK_NOTIFY_CHAT_ID=oc_xxxxxxxxxxxx
 EOF
@@ -168,10 +170,10 @@ Before moving on, explicitly check whether durable publish config is present:
 
 ```bash
 [ -f ~/.config/x-feed-capture/config.env ] && . ~/.config/x-feed-capture/config.env
-printf 'doc=%s\nanchor=%s\nchat=%s\n' "${LARK_DOC_TOKEN:-}" "${LARK_DOC_ANCHOR_BLOCK_ID:-}" "${LARK_NOTIFY_CHAT_ID:-}"
+printf 'doc=%s\nurl=%s\nanchor=%s\nchat=%s\n' "${LARK_DOC_TOKEN:-}" "${LARK_DOC_URL:-}" "${LARK_DOC_ANCHOR_BLOCK_ID:-}" "${LARK_NOTIFY_CHAT_ID:-}"
 ```
 
-If the file is missing, or `LARK_DOC_TOKEN` / `LARK_DOC_ANCHOR_BLOCK_ID` is empty, pause the capture workflow and bootstrap first unless the user explicitly requested a dry run. Prefer this helper:
+If the file is missing, or `LARK_DOC_TOKEN` / `LARK_DOC_URL` / `LARK_DOC_ANCHOR_BLOCK_ID` is empty, pause the capture workflow and bootstrap first unless the user explicitly requested a dry run. Prefer this helper:
 
 ```bash
 /Users/axel/Work/skills/x-feed-capture/bin/bootstrap-x-feed-lark-targets.sh --help
@@ -199,6 +201,8 @@ Before any browser command, verify the configured bridge is healthy:
 Continue only if the response indicates the daemon is OK and the browser extension/session is connected. If not, restart or ask the user to start the bridge. Do not continue with commands that would silently fail.
 
 Use the configured logged-in browser bridge for X so the user's existing session is reused. Do not switch to unrelated browser automation unless the user explicitly changes the tool choice.
+
+When using bridge `evaluate`, remember that the return shape may be a wrapper object such as `{"type":"string","value":"..."}` rather than a raw primitive. Inspect `.value` before dereferencing strings, arrays, or serialized JSON.
 
 ### 3. Read continuation state
 
@@ -269,6 +273,8 @@ Extract visible `article[role=article]` elements, choose the first canonical lin
 
 Deduplicate by canonical `href`. Keep raw extraction separate from final digest text.
 
+Keep extraction scripts evaluator-friendly. Prefer simple DOM walking plus straightforward string checks over regex-heavy or syntax-dense page scripts. If `evaluate` starts throwing parser errors such as `SyntaxError: Unexpected token '^'`, simplify the page script first instead of adding more logic inside the page context.
+
 Do not stop early just because a few rounds produced no new status links. X uses a virtual list and sometimes repeats the same visible articles while new content is loading. Ads may also occupy article slots; skip them and continue scrolling instead of treating them as evidence that extraction failed.
 
 ### 6. Enrich candidate details
@@ -300,6 +306,21 @@ Prefer the installed `lark-doc` skill or a configured `lark-cli`. Insert the new
 
 Use `block_insert_after`. Do not use append or string replacement for this workflow.
 
+When using `lark-cli docs +update --api-version v2`, prefer the explicit update form:
+
+```bash
+lark-cli docs +update --api-version v2 \
+  --as user \
+  --doc "$LARK_DOC_TOKEN" \
+  --command block_insert_after \
+  --block-id "$LARK_DOC_ANCHOR_BLOCK_ID" \
+  --content '<h2>...</h2><p>...</p>'
+```
+
+Do not rely on the short `--mode` interface shown in some help output. In practice, the stable path for this workflow is `--command ... --block-id ... --content ...`.
+
+If the configured anchor is the document title block itself, inserting after that title block is acceptable and keeps the newest capture at the top. Validate the chosen anchor once with `docs +fetch --api-version v2 --detail with-ids` and then keep reusing it.
+
 Digest structure:
 
 ```html
@@ -318,15 +339,27 @@ Rules:
 - Do not paste raw feed text containing garbled symbols or UI fragments.
 - Do not mix heading, body, and link content on one line.
 - Escape or remove malformed text before sending XML/HTML-like content to the document API.
+- When assembling XML/HTML through shell heredocs or interpolated strings, escape `$`-containing text or use single-quoted payload construction so summaries like `$20B+` are not mangled by shell expansion.
 
 ### 9. Notify
 
 If `LARK_NOTIFY_CHAT_ID` or another configured destination is available, send a short success or failure message:
 
-- Success: include fetched count, kept count, and approximate time range.
-- Failure: include the failing step and the concrete recovery action.
+- Success: include fetched count, kept count, approximate time range, and `Document: $LARK_DOC_URL`.
+- No updates: include the checked time range and `Document: $LARK_DOC_URL`.
+- Failure: include the failing step, concrete recovery action, and `Document: $LARK_DOC_URL` when available.
 
-Skip notification rather than inventing a destination.
+Skip notification rather than inventing a destination. Do not send a success notification without the configured document link; run bootstrap first if `LARK_DOC_URL` is missing.
+
+Preferred text shape:
+
+```text
+X Feed Capture: success
+Fetched: 80
+Kept: 8
+Range: since last marker
+Document: https://example.feishu.cn/wiki/...
+```
 
 ### 10. Update continuation state
 
@@ -340,3 +373,5 @@ EOF
 ```
 
 Use `>` overwrite, never `>>` append.
+
+Before updating the state file, do a quick verification read of the just-published section when feasible. If the inserted block contains shell-expansion damage, truncated text, or malformed XML rendering, repair the document first and only then advance `LAST_TIME` / `LAST_HREF`. The state marker is the commit point for this workflow.
