@@ -17,6 +17,27 @@ Choose the mode from the request:
 
 If the user only provides a new goal/spec, default to `evaluate`. If the user says "start", "execute", "run this route", or similar, use `execute`. If the user says "continue", "resume", "pick up", "context cleared", or similar, use `continue`.
 
+## Goal Boundary And Stop Discipline
+
+In `execute` and `continue` mode, the route's `Whole Goal` is the default completion target. The `First Autonomous Slice` is an early checkpoint for validation and commit discipline, not permission to stop the long-horizon run.
+
+Stop at a slice boundary only when the user's request explicitly limits the run to that slice or named workstream. Otherwise, closing a slice means:
+
+1. Consolidate durable findings and evidence into the route.
+2. Archive or reset the active ledger.
+3. Choose the next highest-value unblocked slice or workstream from the route.
+4. Continue execution.
+
+Do not end the turn merely because the first slice, active slice, or a P0 workstream is validated. End only when:
+
+- the `Whole Goal` is complete and validated;
+- the user explicitly asked for only a slice/workstream and that scoped target is complete;
+- a stop rule triggers;
+- the user interrupts or redirects the run;
+- a genuine blocker requires user input after reasonable investigation.
+
+If stopping before the `Whole Goal`, state the exact stop rule, user-scoped target, interruption, or blocker. If none applies, keep going into the next slice.
+
 ## Mode: Evaluate
 
 Evaluate whether the source task is suitable for long-horizon autonomous work.
@@ -101,7 +122,8 @@ Steps:
    - run the review-fix loop before any commit;
    - commit logically when validated and review-clean.
 9. When the active slice closes, consolidate durable results into the route, then archive or reset the ledger for the next slice.
-10. Stop only when a stop rule triggers, the active slice closes, or the user interrupts.
+10. If the `Whole Goal` is not complete and no stop rule or user-scoped slice limit applies, choose the next highest-value unblocked slice/workstream and continue the same cycle.
+11. Stop only when the `Whole Goal` is complete, the explicitly requested slice/workstream is complete, a stop rule triggers, or the user interrupts.
 
 Use the route as the execution plan.
 
@@ -124,7 +146,8 @@ Steps:
 5. Resume the highest-value unblocked task in the active slice.
 6. Resume or choose the commit cadence for the active slice, backfill older route/ledger files if needed, and preserve any pending review-fix state from the ledger.
 7. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
-8. Continue the same evidence-driven cycle as execute mode.
+8. If a slice closes during resumed work, repeat the same consolidation and next-slice handoff unless the `Whole Goal` is complete, a stop rule triggers, or the user explicitly scoped the request to that slice.
+9. Continue the same evidence-driven cycle as execute mode.
 
 If the ledger is missing, do not invent prior state. Treat this as `execute` from the route and create a fresh ledger, noting that prior execution state was unavailable.
 
@@ -342,6 +365,7 @@ Classify major work areas as:
 6. Implement the smallest reversible change.
 7. Validate, compare, document, run review-fix to convergence, and commit if review-clean.
 8. When a slice closes, consolidate durable findings into this route and archive/reset the ledger.
+9. Unless the Whole Goal is complete, a stop rule triggers, or the user explicitly requested only this slice/workstream, continue with the next highest-value unblocked slice.
 
 ## Pivot Rules
 - If a hypothesis is disproven, mark it disproven and choose the next best workstream.
@@ -362,7 +386,8 @@ Classify major work areas as:
 ## Stop Rules
 - Stop and ask if a product/business tradeoff is required.
 - Stop and ask before destructive operations, production access, secret handling, or broad rewrites.
-- Stop if the active slice is reached and validation passes.
+- Stop if the Whole Goal is complete and validation passes.
+- Stop if the user explicitly requested only a slice/workstream and that scoped target is complete and validated.
 - Stop if blocked after reasonable investigation; record attempts and the specific decision needed.
 ```
 
@@ -463,4 +488,5 @@ Before finalizing execute or continue mode:
 - If a slice closed, the ledger is archived or reset before starting another slice.
 - Claims are backed by repeatable evidence.
 - Each commit is preceded by a converged review-fix loop, or the reason no commit was made is recorded.
+- A closed first/active slice is treated as a checkpoint, not a terminal state, unless the user explicitly scoped the run to that slice.
 - Stop rules cover user approval, destructive actions, product tradeoffs, and validation failure.
