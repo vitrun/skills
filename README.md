@@ -6,8 +6,13 @@ A collection of agent skills that extend capabilities across planning, developme
 
 These skills help you think through problems before writing code.
 
+- **brainstorming** — Explore intent, requirements, and design before implementation.
 - **write-a-prd** — Create a PRD through an interactive interview, codebase exploration, and module design. Filed as a GitHub issue.
+- **prd-to-plan** — Turn a PRD into tracer-bullet vertical slices saved as a local plan.
+- **request-refactor-plan** — Create a detailed refactor plan with tiny commits and file it as a GitHub issue.
 - **grill-me** — Get relentlessly interviewed about a plan or design until every branch of the decision tree is resolved.
+- **design-an-interface** — Generate radically different module/interface designs for comparison.
+- **ubiquitous-language** — Extract and normalize a DDD-style glossary from the conversation.
 - **long-horizon-work** — Convert large coding goals into measurable long-running autonomous work packages with validation, guardrails, and launch prompts.
 
 ## Development
@@ -15,7 +20,12 @@ These skills help you think through problems before writing code.
 These skills help you write, refactor, and fix code.
 
 - **tdd** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
+- **systematic-debugging** — Investigate bugs, failures, and unexpected behavior by tracing root cause before fixes.
+- **verification-before-completion** — Require fresh verification evidence before claiming work is complete, fixed, or passing.
+- **receiving-code-review** — Evaluate review feedback technically before implementing it.
+- **finishing-a-development-branch** — Verify, choose an integration path, and safely finish a branch or worktree.
 - **improve-codebase-architecture** — Explore a codebase for architectural improvement opportunities, focusing on deepening shallow modules and improving testability.
+- **using-git-worktrees** — Create or detect isolated git worktrees for feature work.
 
 ## Tooling & Setup
 
@@ -24,13 +34,23 @@ These skills help you write, refactor, and fix code.
 
 ## Vendored Skills
 
-External skills are tracked in `vendor-skills.toml` and copied into this repository with:
+External skills are tracked in `skift.toml` and locked in `skift.lock`.
 
 ```bash
-python3 scripts/update-vendor-skills.py
+uv run --project ../skift skift status
+uv run --project ../skift skift update --check
 ```
 
-The script sparse-checks out only the configured upstream paths, syncs them into local skill directories, and writes `.vendor-skills.lock` with the upstream commit used for each import. Review the resulting diff before committing updates.
+Use `uv run --project ../skift skift inspect <repo>` to discover upstream skills and `uv run --project ../skift skift add <repo>//<path>` to track a single skill. Review the resulting diff before committing updates.
+
+Current tracked upstreams:
+
+- **redesign-skill** — `git@github.com:Leonxlnx/taste-skill.git//skills/redesign-skill`
+- **taste-skill** — `git@github.com:Leonxlnx/taste-skill.git//skills/taste-skill`
+- **systematic-debugging** — `git@github.com:obra/superpowers.git//skills/systematic-debugging`
+- **verification-before-completion** — `git@github.com:obra/superpowers.git//skills/verification-before-completion`
+- **receiving-code-review** — `git@github.com:obra/superpowers.git//skills/receiving-code-review`
+- **finishing-a-development-branch** — `git@github.com:obra/superpowers.git//skills/finishing-a-development-branch`
 
 ## Research & Feeds
 
@@ -39,4 +59,5 @@ The script sparse-checks out only the configured upstream paths, syncs them into
 
 ## Writing Skills
 
+- **edit-article** — Restructure and tighten article drafts.
 - **write-a-skill** — Create new skills with proper structure, progressive disclosure, and bundled resources.

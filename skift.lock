@@ -17,3 +17,39 @@ ref = "main"
 commit = "3c7017d636c3a4aad378433ea6d0cfa6c921da4a"
 updated_at = "2026-05-29T09:47:33Z"
 content_hash = "sha256:2d54b8d2b7b42dc9c23c02c6b71a81ea118d76fc3d1a9ccfe46081031507a26d"
+
+[[skills]]
+name = "systematic-debugging"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/systematic-debugging"
+ref = "main"
+commit = "6fd4507659784c351abbd2bc264c7162cfd386dc"
+updated_at = "2026-06-02T07:16:24Z"
+content_hash = "sha256:5695f2790e41fd1a5674732ae231a4244ca01899c733af69580dbfcfae4ec291"
+
+[[skills]]
+name = "verification-before-completion"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/verification-before-completion"
+ref = "main"
+commit = "6fd4507659784c351abbd2bc264c7162cfd386dc"
+updated_at = "2026-06-02T07:16:30Z"
+content_hash = "sha256:8a33b6dfd538032e415e85ac1e79932d01e20ec2cb477517dbe9aac0808e6b1e"
+
+[[skills]]
+name = "receiving-code-review"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/receiving-code-review"
+ref = "main"
+commit = "6fd4507659784c351abbd2bc264c7162cfd386dc"
+updated_at = "2026-06-02T07:16:35Z"
+content_hash = "sha256:fb7d9f4ea27e5cb3aaa00eab2b3533017e56d4fecddbd61b5d3553555f24b968"
+
+[[skills]]
+name = "finishing-a-development-branch"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/finishing-a-development-branch"
+ref = "main"
+commit = "6fd4507659784c351abbd2bc264c7162cfd386dc"
+updated_at = "2026-06-02T07:16:40Z"
+content_hash = "sha256:beb96331d670ba8a565105b05cefb4603d186ae7ab582964f7c973cbc5cbb464"

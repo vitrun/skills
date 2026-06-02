@@ -13,3 +13,31 @@ repo = "git@github.com:Leonxlnx/taste-skill.git"
 path = "skills/taste-skill"
 ref = "main"
 mode = "guarded"
+
+[[skills]]
+name = "systematic-debugging"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/systematic-debugging"
+ref = "main"
+mode = "guarded"
+
+[[skills]]
+name = "verification-before-completion"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/verification-before-completion"
+ref = "main"
+mode = "guarded"
+
+[[skills]]
+name = "receiving-code-review"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/receiving-code-review"
+ref = "main"
+mode = "guarded"
+
+[[skills]]
+name = "finishing-a-development-branch"
+repo = "git@github.com:obra/superpowers.git"
+path = "skills/finishing-a-development-branch"
+ref = "main"
+mode = "guarded"
