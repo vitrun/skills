@@ -14,6 +14,7 @@ These skills help you think through problems before writing code.
 - **design-an-interface** — Generate radically different module/interface designs for comparison.
 - **ubiquitous-language** — Extract and normalize a DDD-style glossary from the conversation.
 - **long-horizon-work** — Convert large coding goals into measurable long-running autonomous work packages with validation, guardrails, and launch prompts.
+- **programmable-doc-review** — Audit and tighten technical docs until coding agents can implement them consistently, with clear agent-fill vs human-escalation boundaries.
 
 ## Development
 

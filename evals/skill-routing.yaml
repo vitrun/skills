@@ -42,3 +42,15 @@
     - engineering-interview
   should_not_load:
     - grill-me
+
+- query: "通读 docs/p1-recommendation，看技术文档是否已经达到可编程状态，哪些需要我拍板"
+  should_load:
+    - programmable-doc-review
+  should_not_load:
+    - edit-article
+
+- query: "这份架构方案还不够 crystal clear，帮我判断 coding agent 能不能直接开工"
+  should_load:
+    - programmable-doc-review
+  should_not_load:
+    - write-a-prd
