@@ -32,6 +32,10 @@ These skills help you write, refactor, and fix code.
 - **setup-pre-commit** — Set up Husky pre-commit hooks with lint-staged, Prettier, type checking, and tests.
 - **git-guardrails-claude-code** — Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, etc.) before they execute.
 
+## Hiring & Interviews
+
+- **engineering-interview** — Run staged engineering interview workflows: resume analysis and questioning, Q&A organization, and JD-aligned assessment.
+
 ## Vendored Skills
 
 External skills are tracked in `skift.toml` and locked in `skift.lock`.
