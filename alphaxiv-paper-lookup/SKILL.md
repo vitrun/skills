@@ -1,6 +1,6 @@
 ---
 name: alphaxiv-paper-lookup
-description: Look up any arxiv paper on alphaxiv.org to get a structured AI-generated overview. This is faster and more reliable than trying to read a raw PDF.
+description: Look up any arxiv paper on alphaxiv.org to get a structured AI-generated overview. Use when the user shares an arXiv or AlphaXiv URL, gives a paper ID, or asks to explain, summarize, or analyze a research paper.
 ---
 
 # AlphaXiv Paper Lookup
