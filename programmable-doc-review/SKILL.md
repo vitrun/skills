@@ -7,6 +7,8 @@ description: Audit and tighten technical design docs until they are implementati
 
 Use this skill to turn technical docs into contracts that independent coding agents can implement consistently. The skill does not replace human judgment; it concentrates human judgment into the few decisions that create product, data, infrastructure, or ownership commitments.
 
+The north star is not "the document sounds complete"; it is "two independent implementers, given the same inputs, would build the same observable behavior, data shapes, state transitions, and acceptance checks."
+
 ## Operating Rules
 
 - Start from the current files, sibling docs, IDL, schemas, code paths, logs, or user-provided source of truth. Re-read before patching.
@@ -14,6 +16,8 @@ Use this skill to turn technical docs into contracts that independent coding age
 - Never invent enum values, thresholds, IDs, RPCs, event names, table fields, SLAs, retention windows, or owner commitments.
 - Prefer the smallest viable production contract. Remove vague optionality unless it is intentionally part of the contract and has an owner.
 - Final doc text should state settled conclusions. Do not preserve meeting traces, tradeoff discussion, or "we considered" history unless explicitly requested.
+- Treat sibling docs, schemas, examples, and diagrams as possible competing sources of truth until the doc declares which one is authoritative.
+- When a paragraph uses an action verb such as merge, dedupe, fallback, refill, retry, patch, publish, relax, demote, reconcile, score, normalize, or rebuild, check whether the mechanics are closed enough to code.
 
 ## Programmable-Ready Rubric
 
@@ -25,6 +29,12 @@ A doc is programmable when a fresh coding agent can derive the same implementati
 - Error semantics, partial/degraded behavior, timeout behavior, and blocking vs non-blocking dependencies are settled.
 - Storage keys, retention, versioning, migration/backfill, publish/rollback, and cleanup ownership are defined where relevant.
 - Cross-doc terminology is consistent; no stale names survive in sibling docs.
+- Each overlapping concept has one declared source of truth. Non-authoritative examples are labeled as examples or removed.
+- Algorithms and procedures specify input set, ordering, tie-breakers, mutation/replacement behavior, termination, and whether the process iterates.
+- Numeric, enum, boolean, date/time, and transformed fields define value domain, normalization or conversion rule, missing/default semantics, and validation failures.
+- Data-plane contracts specify where payload bodies live, how readers locate them, wire/storage format, schema/version binding, and behavior on missing or incompatible data.
+- Derived state specifies source facts, watermark, dedupe key, aggregation/update rule, version generation, replay/rebuild path, and idempotency.
+- Determinism-critical fields specify canonical ordering, timezone, checksum/hash algorithm, serialization format, and stable tie-breakers.
 - Ready checks and validation evidence are concrete enough for implementation start.
 - Open questions are few, named, and routed to the owner who can decide them.
 
@@ -33,14 +43,21 @@ A doc is programmable when a fresh coding agent can derive the same implementati
 1. Identify the target artifact and source hierarchy.
    - List the docs/files/contracts being reviewed.
    - Note whether the user asked for review-only, patching, docs-only analysis, or code-backed analysis.
+   - Build a quick source hierarchy: authoritative contract, supporting explanation, illustrative examples, obsolete or replaced sections.
 2. Audit for implementation ambiguity.
    - Scan for words like optional, TBD, later, maybe, should support, can provide, depends, reasonable, and not sure.
    - Compare sibling docs for inconsistent field names, ownership, lifecycle, source of truth, or ready conditions.
    - Check whether every consumer-facing statement can be encoded, tested, or monitored.
+   - Run a divergence audit: ask where two reasonable implementers could produce different output from the same input.
+   - Check procedure closure: for every nontrivial process, identify input collection, output collection, stable ordering, tie-breakers, replacement/mutation rules, retry/relaxation rules, and stop condition.
+   - Check data-plane closure: for every referenced artifact, snapshot, payload, state, or generated body, identify its storage location or URI, schema/wire format, reader path, version compatibility, and missing-data behavior.
+   - Check transformation closure: for every score, enum, timestamp, key, checksum, hash, derived field, or normalized value, identify its exact formula, value domain, default/missing behavior, and validation failure mode.
+   - Check derived-state closure: for every maintained state, identify source facts, watermark, dedupe key, aggregation/update rule, version generation, replay/rebuild path, and idempotency boundary.
 3. Classify each gap.
    - `fill`: The agent can patch directly from existing source of truth or a low-risk implementation default.
    - `recommend`: The agent should propose one default because best practice/MVP constraints strongly favor it, but the user may still want to approve.
    - `escalate`: A human must decide because the choice creates or changes product semantics, cross-team ownership, data contracts, external SLAs, cost/compliance posture, or architecture direction.
+   - Prioritize by divergence risk first: issues that change observable output, stored data, derived inputs, state transitions, or recovery behavior outrank wording polish.
 4. Reduce human load.
    - Do not ask broad "what do you want?" questions.
    - For each escalation, give one recommended option, the reason, and the concrete consequence of choosing differently.
@@ -60,7 +77,7 @@ Agent may decide when:
 
 Escalate to a human when:
 
-- The decision defines business meaning, metric normalization, attribution, recommendation policy, privacy/compliance scope, or product behavior.
+- The decision defines business meaning, metric normalization, attribution, selection/scoring policy, privacy/compliance scope, or product behavior.
 - The decision assigns ownership across teams or changes who must produce, store, operate, or certify a contract.
 - Multiple plausible designs would create different future architectures or migration paths.
 - A source of truth is missing and writing a concrete value would fabricate a contract.
@@ -75,6 +92,21 @@ For review-only work, report:
 Ready | Ready except N decisions | Not ready
 
 ## Agent-fill Items
+- ...
+
+## Divergence Risks
+- Same input could produce different implementations because ...
+
+## Two-Truth Conflicts
+- ...
+
+## Procedure Closure Gaps
+- ...
+
+## Data/State Contract Gaps
+- ...
+
+## Determinism Gaps
 - ...
 
 ## Recommended Defaults
