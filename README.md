@@ -24,6 +24,7 @@ These skills help you write, refactor, and fix code.
 - **tdd** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **systematic-debugging** — Investigate bugs, failures, and unexpected behavior by tracing root cause before fixes.
 - **verification-before-completion** — Require fresh verification evidence before claiming work is complete, fixed, or passing.
+- **local-production-validation** — Design local validation that exercises the real production-shaped component surface with local/mock adapters instead of internal calls.
 - **receiving-code-review** — Evaluate review feedback technically before implementing it.
 - **finishing-a-development-branch** — Verify, choose an integration path, and safely finish a branch or worktree.
 - **improve-codebase-architecture** — Explore a codebase for architectural improvement opportunities, focusing on deepening shallow modules and improving testability.

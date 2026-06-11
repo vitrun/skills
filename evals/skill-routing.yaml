@@ -25,6 +25,24 @@
   should_not_load:
     - prd-to-plan
 
+- query: "帮我本地 validate 这个 serverless job，按真实 event contract 触发，云上的队列和存储先 adapter/mock"
+  should_load:
+    - local-production-validation
+  should_not_load:
+    - systematic-debugging
+
+- query: "这个 long-running task 适不适合做成长程工作？先生成 route.md"
+  should_load:
+    - long-horizon-work
+  should_not_load:
+    - local-production-validation
+
+- query: "给这个 helper 函数补一个单测，本地跑一下"
+  should_load:
+    - tdd
+  should_not_load:
+    - local-production-validation
+
 - query: "检查一下这个 skills 仓库，有哪些 skill 太长、description 不清楚"
   should_load:
     - skill-maintenance

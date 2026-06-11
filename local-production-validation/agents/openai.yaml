@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local Production Validation"
+  short_description: "Keep local validation production-shaped"
+  default_prompt: "Use $local-production-validation to design and verify a local harness that exercises the real component surface with local or mock dependencies."
