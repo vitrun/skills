@@ -54,3 +54,15 @@
     - programmable-doc-review
   should_not_load:
     - write-a-prd
+
+- query: "先把这个后端服务按请求处理链路抽出来，再审计可靠性问题"
+  should_load:
+    - perspective-context
+  should_not_load:
+    - systematic-debugging
+
+- query: "不要直接评价这个推荐系统方案，先整理成样本到线上排序的链路，再看哪里会导致效果归因失真"
+  should_load:
+    - perspective-context
+  should_not_load:
+    - programmable-doc-review

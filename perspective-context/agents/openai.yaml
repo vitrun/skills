@@ -1,0 +1,4 @@
+interface:
+  display_name: "Perspective Context"
+  short_description: "Reshape messy inputs into inspectable analysis contexts"
+  default_prompt: "Use $perspective-context to reshape this material into a focused intermediate representation, then audit it against my goal."

@@ -15,6 +15,7 @@ These skills help you think through problems before writing code.
 - **ubiquitous-language** — Extract and normalize a DDD-style glossary from the conversation.
 - **long-horizon-work** — Convert large coding goals into measurable long-running autonomous work packages with validation, guardrails, and launch prompts.
 - **programmable-doc-review** — Audit and tighten technical docs until coding agents can implement them consistently, with clear agent-fill vs human-escalation boundaries.
+- **perspective-context** — Reshape large mixed materials into a focused intermediate representation before audit, diagnosis, or improvement.
 
 ## Development
 
