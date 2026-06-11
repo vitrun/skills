@@ -21,12 +21,28 @@ If the user only provides a new goal/spec, default to `evaluate`. If the user sa
 
 In `execute` and `continue` mode, the route's `Whole Goal` is the default completion target. The `First Autonomous Slice` is an early checkpoint for validation and commit discipline, not permission to stop the long-horizon run.
 
+The route's `Whole Goal Checklist` is the authoritative progress view. Keep it near the top of the route, update it at every slice boundary, and use only these status values:
+
+- `done`: completed with linked evidence.
+- `doing`: actively being worked now.
+- `todo`: not started and not blocked.
+- `blocked`: cannot continue without specific user input or external state change.
+- `deferred`: explicitly out of the current route or approved later.
+
 Stop at a slice boundary only when the user's request explicitly limits the run to that slice or named workstream. Otherwise, closing a slice means:
 
 1. Consolidate durable findings and evidence into the route.
-2. Archive or reset the active ledger.
-3. Choose the next highest-value unblocked slice or workstream from the route.
-4. Continue execution.
+2. Update the `Whole Goal Checklist`.
+3. Archive or reset the active ledger.
+4. Choose the next highest-value unblocked `todo`/`doing` checklist item or workstream from the route.
+5. Continue execution.
+
+Before ending an `execute` or `continue` run, perform a Stop Audit against the `Whole Goal Checklist`:
+
+1. If any `doing` or `todo` checklist item remains and is not covered by a stop rule or explicit user scope limit, continue with the next highest-value item.
+2. If an item is `blocked`, record the exact blocker, attempts made, and required user decision or external state change.
+3. If an item is `deferred`, record why it is outside the current route.
+4. If all non-deferred items are `done`, run the route's final validation before declaring the Whole Goal complete.
 
 Do not end the turn merely because the first slice, active slice, or a P0 workstream is validated. End only when:
 
@@ -121,8 +137,8 @@ Steps:
    - update the ledger;
    - run the review-fix loop before any commit;
    - commit logically when validated and review-clean.
-9. When the active slice closes, consolidate durable results into the route, then archive or reset the ledger for the next slice.
-10. If the `Whole Goal` is not complete and no stop rule or user-scoped slice limit applies, choose the next highest-value unblocked slice/workstream and continue the same cycle.
+9. When the active slice closes, consolidate durable results into the route, update the `Whole Goal Checklist`, then archive or reset the ledger for the next slice.
+10. Run the Stop Audit. If the `Whole Goal` is not complete and no stop rule or user-scoped slice limit applies, choose the next highest-value unblocked `todo`/`doing` checklist item or workstream and continue the same cycle.
 11. Stop only when the `Whole Goal` is complete, the explicitly requested slice/workstream is complete, a stop rule triggers, or the user interrupts.
 
 Use the route as the execution plan.
@@ -145,8 +161,8 @@ Steps:
 4. Inspect `git status` and recent commits.
 5. Resume the highest-value unblocked task in the active slice.
 6. Resume or choose the commit cadence for the active slice, backfill older route/ledger files if needed, and preserve any pending review-fix state from the ledger.
-7. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
-8. If a slice closes during resumed work, repeat the same consolidation and next-slice handoff unless the `Whole Goal` is complete, a stop rule triggers, or the user explicitly scoped the request to that slice.
+7. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, update the `Whole Goal Checklist`, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
+8. If a slice closes during resumed work, repeat the same consolidation and next-slice handoff unless the Stop Audit shows the `Whole Goal` is complete, a stop rule triggers, or the user explicitly scoped the request to that slice.
 9. Continue the same evidence-driven cycle as execute mode.
 
 If the ledger is missing, do not invent prior state. Treat this as `execute` from the route and create a fresh ledger, noting that prior execution state was unavailable.
@@ -164,9 +180,10 @@ At the end of each slice, run consolidation:
 
 1. Distill durable findings, results, decisions, risks, deferrals, and next-slice recommendations from the ledger into the route.
 2. Mark the active slice closed in the route with evidence.
-3. Archive the ledger or reset it for the next slice.
-4. If archiving, use a predictable path such as `docs/long-horizon-archive/<name>-ledger-<slice>.md`.
-5. Create a fresh active ledger for the next slice only when execution continues.
+3. Update the `Whole Goal Checklist` so the next unblocked `todo`/`doing` item is obvious.
+4. Archive the ledger or reset it for the next slice.
+5. If archiving, use a predictable path such as `docs/long-horizon-archive/<name>-ledger-<slice>.md`.
+6. Create a fresh active ledger for the next slice only when execution continues.
 
 The route owns durable knowledge. The ledger owns resumable execution state.
 
@@ -216,9 +233,12 @@ A route is the stable project plan. It should be specific enough to guide hours 
 Always include first closure:
 
 - `Whole Goal`: the full project outcome.
+- `Whole Goal Checklist`: a scannable outcome-level progress table with `done`, `doing`, `todo`, `blocked`, and `deferred` statuses.
 - `First Autonomous Slice`: the first few-hour closure target.
 - `Stretch Goals`: optional work after first slice validates.
 - `Explicitly Deferred`: work left for later because it is high risk, blocked on external access, or too broad.
+
+The checklist is a status surface, not a rigid low-level implementation script. Each item should name an outcome or externally meaningful capability, the evidence that will prove it, and the next action. Avoid filling it with tiny code-edit steps.
 
 Prefer a first slice that:
 
@@ -274,6 +294,12 @@ Classify major work areas as:
 
 ## Whole Goal
 <Full project outcome, including later phases.>
+
+## Whole Goal Checklist
+| Status | ID | Outcome | Evidence | Next Action |
+| --- | --- | --- | --- | --- |
+| todo | G1 | <outcome or capability> | <command/artifact/result that proves it> | <next concrete action> |
+| todo | G2 | <outcome or capability> | <command/artifact/result that proves it> | <next concrete action> |
 
 ## First Autonomous Slice
 <The first few-hour closure target. Include what is in, what is out, and what evidence proves it closed.>
@@ -344,10 +370,10 @@ Classify major work areas as:
 | <area> | implement now / spike first / defer / ask user | <why> | <action> |
 
 ## Workstreams
-| ID | Priority | Slice | Workstream | Hypothesis | Validation | Done When | Risk |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| W1 | P0 | first | <baseline/harness> | <why it matters> | <how to test> | <completion definition> | <risk> |
-| W2 | P1 | first/stretch/deferred | <workstream> | <why it might help> | <how to prove/disprove> | <completion definition> | <risk> |
+| ID | Status | Priority | Slice | Workstream | Hypothesis | Validation | Done When | Risk |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| W1 | todo | P0 | first | <baseline/harness> | <why it matters> | <how to test> | <completion definition> | <risk> |
+| W2 | todo | P1 | first/stretch/deferred | <workstream> | <why it might help> | <how to prove/disprove> | <completion definition> | <risk> |
 
 ## Commit Plan
 - Cadence: <per validated workstream / per vertical slice / per harness then implementation / spike branch only>
@@ -364,8 +390,9 @@ Classify major work areas as:
 5. Pick the highest-value workstream in the active slice.
 6. Implement the smallest reversible change.
 7. Validate, compare, document, run review-fix to convergence, and commit if review-clean.
-8. When a slice closes, consolidate durable findings into this route and archive/reset the ledger.
-9. Unless the Whole Goal is complete, a stop rule triggers, or the user explicitly requested only this slice/workstream, continue with the next highest-value unblocked slice.
+8. When a slice closes, consolidate durable findings into this route, update the Whole Goal Checklist, and archive/reset the ledger.
+9. Before stopping, run a Stop Audit against the Whole Goal Checklist.
+10. Unless every non-deferred checklist item is done, a stop rule triggers, or the user explicitly requested only this slice/workstream, continue with the next highest-value unblocked checklist item or workstream.
 
 ## Pivot Rules
 - If a hypothesis is disproven, mark it disproven and choose the next best workstream.
@@ -389,6 +416,7 @@ Classify major work areas as:
 - Stop if the Whole Goal is complete and validation passes.
 - Stop if the user explicitly requested only a slice/workstream and that scoped target is complete and validated.
 - Stop if blocked after reasonable investigation; record attempts and the specific decision needed.
+- Do not stop just because W1, the first slice, or the active slice is done while the Whole Goal Checklist still has unblocked `todo` or `doing` items.
 ```
 
 ## Ledger Template
@@ -471,12 +499,13 @@ Before finalizing evaluate mode:
 - The suitability decision is explicit.
 - Unsuitable tasks include actionable reasons.
 - Suitable tasks have a route file but no execution ledger yet.
-- Large suitable tasks have a first autonomous slice, stretch goals, and explicit deferrals.
+- Large suitable tasks have a Whole Goal Checklist, first autonomous slice, stretch goals, and explicit deferrals.
+- The Whole Goal Checklist is near the top of the route, uses only `done`, `doing`, `todo`, `blocked`, and `deferred`, and tracks outcome-level progress rather than tiny implementation steps.
 - External specs include freshness/version assumptions when relevant.
 - Risky areas are marked implement now / spike first / defer / ask user.
 - Validation surfaces are mapped independently from implementation steps.
 - Commit cadence, boundaries, and review-fix requirements are explicit.
-- The route document is not a rigid implementation checklist.
+- The route document is not a rigid low-level implementation checklist, but it does include a scannable outcome-level status checklist.
 - The user is told how to start in one short sentence.
 
 Before finalizing execute or continue mode:
@@ -485,8 +514,10 @@ Before finalizing execute or continue mode:
 - The route remains the source of strategy; the ledger remains the source of execution state.
 - The ledger is bounded to active-slice working memory.
 - Closed slice findings/results/decisions are consolidated into the route.
+- The Whole Goal Checklist reflects the current state after any slice closure.
 - If a slice closed, the ledger is archived or reset before starting another slice.
 - Claims are backed by repeatable evidence.
 - Each commit is preceded by a converged review-fix loop, or the reason no commit was made is recorded.
 - A closed first/active slice is treated as a checkpoint, not a terminal state, unless the user explicitly scoped the run to that slice.
+- A Stop Audit was performed; if any unblocked `todo` or `doing` checklist item remains, execution continues instead of finalizing.
 - Stop rules cover user approval, destructive actions, product tradeoffs, and validation failure.
