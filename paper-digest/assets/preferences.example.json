@@ -1,0 +1,13 @@
+{
+  "interested": [
+    "coding agents and agentic workflows",
+    "evaluation, benchmarks, and trustworthy measurement",
+    "inference, serving, and systems work for LLM products",
+    "multimodal product use cases with practical engineering value"
+  ],
+  "excluded": [
+    "biology and medical papers unless the method is broadly reusable",
+    "materials science",
+    "pure theorem-heavy theory without practical ML relevance"
+  ]
+}

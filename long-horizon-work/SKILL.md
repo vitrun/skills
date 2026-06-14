@@ -1,6 +1,6 @@
 ---
 name: long-horizon-work
-description: Assess, start, and continue long-running autonomous coding work. Use when a user asks whether a coding task is suitable for long-horizon work, wants a goal/spec converted into a route.md, asks to execute a long-horizon route, or asks to resume/continue after interruption by picking up route.md and the execution ledger.
+description: Assess, start, and continue long-running autonomous coding work. Use when a user asks whether a coding task is suitable for long-horizon work, wants a goal/spec converted into a long-horizon-route-<slug>.md file, asks to execute a long-horizon route, or asks to resume/continue using the route and active per-slice scratchpad.
 ---
 
 # Long Horizon Work
@@ -11,9 +11,9 @@ Long-horizon work has a default git discipline: choose a commit cadence that fit
 
 Choose the mode from the request:
 
-- `evaluate`: assess a goal/spec and, if suitable, produce a route document. Do not create a ledger yet.
-- `execute`: start working from a route document. Create the ledger if missing, then work autonomously.
-- `continue`: resume interrupted work. Read the route and existing ledger, then continue from recorded state.
+- `evaluate`: assess a goal/spec and, if suitable, produce a route document. Do not create a scratchpad yet.
+- `execute`: start working from a route document. Create one scratchpad for the first active slice, then work autonomously.
+- `continue`: resume interrupted work. Read the route and the active slice scratchpad, then continue from recorded state.
 
 If the user only provides a new goal/spec, default to `evaluate`. If the user says "start", "execute", "run this route", or similar, use `execute`. If the user says "continue", "resume", "pick up", "context cleared", or similar, use `continue`.
 
@@ -33,9 +33,9 @@ Stop at a slice boundary only when the user's request explicitly limits the run 
 
 1. Consolidate durable findings and evidence into the route.
 2. Update the `Whole Goal Checklist`.
-3. Archive or reset the active ledger.
+3. Close the current slice scratchpad.
 4. Choose the next highest-value unblocked `todo`/`doing` checklist item or workstream from the route.
-5. Continue execution.
+5. Create a new scratchpad for the next slice and continue execution.
 
 Before ending an `execute` or `continue` run, perform a Stop Audit against the `Whole Goal Checklist`:
 
@@ -101,10 +101,10 @@ Produce:
 
 If working in a repo or file-producing context, write only the route file during evaluate. Prefer:
 
-- `docs/long-horizon-route.md`
-- or a specific name such as `docs/janus-image-api-route.md`
+- `docs/long-horizon-route-<slug>.md`
+- or a specific scoped path such as `docs/long-horizon-route-janus-image-api.md`
 
-Do not create the ledger during evaluate. The ledger belongs to execution state and should be created only when `execute` starts. The route may name the planned ledger path.
+Do not create a scratchpad during evaluate. Scratchpads belong to execution state and are created only when `execute` or `continue` starts a slice. The route must name the scratchpad naming pattern.
 
 The route must include a `Commit Plan` that chooses a cadence, names commit boundaries, and requires the pre-commit review-fix loop.
 
@@ -120,28 +120,27 @@ Use this when the user asks to start or execute a route.
 
 Steps:
 
-1. Locate the route document from the user's path or common names such as `docs/*route*.md`.
+1. Locate the route document from the user's path or common names such as `docs/long-horizon-route-*.md`.
 2. Read the route and relevant source/spec if referenced.
 3. Inspect `git status`.
-4. Create the ledger at the path specified by the route. If no path is specified, create a sibling file named like `<route-name>-ledger.md`.
-5. Initialize the ledger as working memory for the active slice with run state, task board, validation surface status, experiment log, decision log, change log, commit plan, review-fix log, discoveries, blockers, and next actions.
-6. Choose and record the commit cadence for the active slice if the route does not already specify one; backfill the route's `Commit Plan` and ledger `Commit Plan` for older routes.
-7. Execute the first autonomous slice from the route.
-8. Work in evidence-driven cycles:
+4. Select the first active slice from the route.
+5. Create a scratchpad for that slice using the route's naming pattern, normally `docs/long-horizon-scratchpad-<slug>-<slice-id>.md`, and set the route's `Active Scratchpad` to that path.
+6. Initialize the scratchpad as local working memory for that slice with slice state, local tasks, current hypothesis, recent evidence, temporary findings, blockers, review-fix notes, and next actions.
+7. Choose and record the commit cadence for the active slice if the route does not already specify one.
+8. Execute the first autonomous slice from the route.
+9. Work in evidence-driven cycles:
    - choose the highest-value executable task;
-   - state the hypothesis and done condition in the ledger;
+   - state the hypothesis and done condition in the scratchpad;
    - establish or reuse baseline;
    - make the smallest reversible change;
    - run validation;
    - compare before/after behavior;
-   - update the ledger;
+   - update the scratchpad;
    - run the review-fix loop before any commit;
    - commit logically when validated and review-clean.
-9. When the active slice closes, consolidate durable results into the route, update the `Whole Goal Checklist`, then archive or reset the ledger for the next slice.
-10. Run the Stop Audit. If the `Whole Goal` is not complete and no stop rule or user-scoped slice limit applies, choose the next highest-value unblocked `todo`/`doing` checklist item or workstream and continue the same cycle.
-11. Stop only when the `Whole Goal` is complete, the explicitly requested slice/workstream is complete, a stop rule triggers, or the user interrupts.
-
-Use the route as the execution plan.
+10. When the active slice closes, consolidate durable results into the route, update the `Whole Goal Checklist`, and mark the scratchpad closed.
+11. Run the Stop Audit. If the `Whole Goal` is not complete and no stop rule or user-scoped slice limit applies, choose the next highest-value unblocked `todo`/`doing` checklist item or workstream, create a new scratchpad for that slice, and continue the same cycle.
+12. Stop only when the `Whole Goal` is complete, the explicitly requested slice/workstream is complete, a stop rule triggers, or the user interrupts.
 
 ## Mode: Continue
 
@@ -151,41 +150,40 @@ Steps:
 
 1. Locate the route document:
    - use the user's explicit path, or
-   - search common route names such as `docs/*route*.md`, or
+   - search common route names such as `docs/long-horizon-route-*.md`, or
    - ask only if multiple plausible routes exist and choosing one would be risky.
-2. Locate the ledger:
-   - use the path named in the route, or
-   - use the user's explicit path, or
-   - search sibling/common names such as `docs/*ledger*.md`.
-3. Read route and ledger before relying on any chat memory.
+2. Locate the active scratchpad from the route:
+   - use the route's active scratchpad path if present, or
+   - create a scratchpad for the current `doing` slice if the route has no active scratchpad yet, or
+   - ask only if route state conflicts and choosing a slice would be risky.
+3. Read route and scratchpad before relying on any chat memory.
 4. Inspect `git status` and recent commits.
 5. Resume the highest-value unblocked task in the active slice.
-6. Resume or choose the commit cadence for the active slice, backfill older route/ledger files if needed, and preserve any pending review-fix state from the ledger.
-7. If the ledger says the active slice is closed, consolidate any remaining durable findings into the route, update the `Whole Goal Checklist`, archive or reset the ledger, then choose the next slice from the route using evidence, risk, and stop rules.
+6. Resume or choose the commit cadence for the active slice and preserve any pending review-fix state from the scratchpad.
+7. If the scratchpad says the active slice is closed, consolidate any remaining durable findings into the route, update the `Whole Goal Checklist`, then choose the next slice from the route using evidence, risk, and stop rules.
 8. If a slice closes during resumed work, repeat the same consolidation and next-slice handoff unless the Stop Audit shows the `Whole Goal` is complete, a stop rule triggers, or the user explicitly scoped the request to that slice.
 9. Continue the same evidence-driven cycle as execute mode.
 
-If the ledger is missing, do not invent prior state. Treat this as `execute` from the route and create a fresh ledger, noting that prior execution state was unavailable.
+If the active scratchpad is missing, do not invent prior temporary state. Create a fresh scratchpad for the route's current active slice and continue from the durable route state.
 
-## Route And Ledger Memory Model
+## Route And Scratchpad Memory Model
 
-Keep route and ledger separate:
+Use exactly two artifact types:
 
-- `route.md` is durable project memory. It stores the strategy, stable findings, completed slice summaries, verified results, durable decisions, disproven hypotheses, updated risks, deferred work, and next slices.
-- `ledger.md` is working memory for the active slice. It stores only the state needed to resume current work: active workstream, task board, recent experiments, current blockers, temporary notes, validation status, and next actions.
+- `long-horizon-route-<slug>.md` is durable project memory. It stores the strategy, stable findings, completed slice summaries, verified results, durable decisions, disproven hypotheses, updated risks, deferred work, and next slices.
+- `long-horizon-scratchpad-<slug>-<slice-id>.md` is temporary working memory for one slice. It stores only the state needed to resume that slice: local tasks, current hypothesis, recent evidence, temporary findings, blockers, review-fix notes, and next actions.
 
-Keep the ledger concise and relevant to the active slice. Avoid raw command noise unless it is evidence.
+The route is the index: its `Active Scratchpad` section records the current scratchpad path or `none`.
+
+Keep the scratchpad concise and local to its slice. Avoid raw command noise unless it is evidence. It may reference route checklist or workstream IDs, but it must not copy the `Whole Goal Checklist` or the full `Workstreams` list.
 
 At the end of each slice, run consolidation:
 
-1. Distill durable findings, results, decisions, risks, deferrals, and next-slice recommendations from the ledger into the route.
+1. Distill durable findings, results, decisions, risks, deferrals, and next-slice recommendations from the scratchpad into the route.
 2. Mark the active slice closed in the route with evidence.
 3. Update the `Whole Goal Checklist` so the next unblocked `todo`/`doing` item is obvious.
-4. Archive the ledger or reset it for the next slice.
-5. If archiving, use a predictable path such as `docs/long-horizon-archive/<name>-ledger-<slice>.md`.
-6. Create a fresh active ledger for the next slice only when execution continues.
-
-The route owns durable knowledge. The ledger owns resumable execution state.
+4. Mark the scratchpad `closed`, stop appending to it, and set the route's `Active Scratchpad` to `none`.
+5. Create a fresh scratchpad for the next slice only when execution continues.
 
 ## Commit Cadence And Standards
 
@@ -206,7 +204,7 @@ Before committing:
 2. Confirm the diff matches the intended workstream and excludes unrelated user changes.
 3. Run the route's required validation for the changed surface.
 4. Run the review-fix loop below.
-5. Record the commit hash, summary, validation, and residual risk in the ledger after the commit succeeds.
+5. Record the commit hash, summary, validation, and residual risk in the scratchpad after the commit succeeds, then consolidate durable commit evidence into the route at slice close.
 
 Use concise imperative commit messages. Include a scope when it helps, for example `skift: add status drift detection`.
 
@@ -222,7 +220,7 @@ Run this loop before every commit and when closing a slice.
 3. Fix all `must-fix` and in-scope `should-fix` findings.
 4. Re-run targeted validation after fixes.
 5. Repeat review and fix until a full review pass finds no `must-fix` issues and no in-scope `should-fix` issues.
-6. Record deferred findings in the ledger and, if durable, the route.
+6. Record deferred findings in the scratchpad and, if durable, the route.
 
 Convergence means one clean review pass after the latest fix. If the same issue class persists after repeated attempts, stop only when a stop rule applies or a user/product decision is genuinely required; otherwise keep narrowing and fixing.
 
@@ -268,7 +266,7 @@ If validation is weak, make validation-harness creation part of the first autono
 
 If the task depends on an external API, SDK, protocol, model capability, browser behavior, cloud service, law, price, or standard, require a freshness check before implementation.
 
-Record in the route or ledger:
+Record in the route or scratchpad:
 
 - source URL or local reference
 - checked date
@@ -299,24 +297,19 @@ Classify major work areas as:
 | Status | ID | Outcome | Evidence | Next Action |
 | --- | --- | --- | --- | --- |
 | todo | G1 | <outcome or capability> | <command/artifact/result that proves it> | <next concrete action> |
-| todo | G2 | <outcome or capability> | <command/artifact/result that proves it> | <next concrete action> |
 
 ## First Autonomous Slice
 <The first few-hour closure target. Include what is in, what is out, and what evidence proves it closed.>
 
-## Ledger
-- Path: <planned-ledger-path>
-- Created: no
-- Note: The ledger is created when execution starts, not during evaluate.
+## Active Scratchpad
+- Current: none
+- Naming: `docs/long-horizon-scratchpad-<slug>-<slice-id>.md`
+- Rule: one scratchpad per slice. Create it only when execution starts or a new slice begins.
 
 ## Success Criteria
 - <Metric or acceptance criterion>
 - <Correctness/stability criterion>
 - <Regression criterion>
-
-## Scope
-- <Included area>
-- <Included area>
 
 ## Non-Goals
 - <Explicitly excluded work>
@@ -339,22 +332,11 @@ Classify major work areas as:
 - <Data/security/destructive-operation rule>
 - <When to ask the user>
 
-## Current Known Context
-- <What the source document says is already true>
-- <Known completed work>
-- <Known risks or assumptions>
-
-## External Freshness
-| Source | Checked Date | Version / Assumption | Relevant Facts | Conflict |
-| --- | --- | --- | --- | --- |
-| <official docs / SDK / protocol> | <date> | <version> | <fact> | <none or conflict> |
-
 ## Validation Surface Map
 | Surface | Purpose | Command / Method | Required For First Slice |
 | --- | --- | --- | --- |
 | unit | <what it proves> | `<command>` | yes/no |
 | contract | <what it proves> | `<command>` | yes/no |
-| compat | <what it proves> | `<command>` | yes/no |
 
 ## Evidence Plan
 - Baseline commands:
@@ -373,7 +355,6 @@ Classify major work areas as:
 | ID | Status | Priority | Slice | Workstream | Hypothesis | Validation | Done When | Risk |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | W1 | todo | P0 | first | <baseline/harness> | <why it matters> | <how to test> | <completion definition> | <risk> |
-| W2 | todo | P1 | first/stretch/deferred | <workstream> | <why it might help> | <how to prove/disprove> | <completion definition> | <risk> |
 
 ## Commit Plan
 - Cadence: <per validated workstream / per vertical slice / per harness then implementation / spike branch only>
@@ -384,19 +365,19 @@ Classify major work areas as:
 
 ## Execution Rules
 1. Read this route and the source documents.
-2. Create the ledger on execute if it does not exist.
+2. Create a scratchpad for the active slice on execute or when a new slice begins, then set `Active Scratchpad` to its path.
 3. Record git status and branch.
 4. Establish baseline.
 5. Pick the highest-value workstream in the active slice.
 6. Implement the smallest reversible change.
 7. Validate, compare, document, run review-fix to convergence, and commit if review-clean.
-8. When a slice closes, consolidate durable findings into this route, update the Whole Goal Checklist, and archive/reset the ledger.
+8. When a slice closes, consolidate durable findings into this route, update the Whole Goal Checklist, and mark the scratchpad closed.
 9. Before stopping, run a Stop Audit against the Whole Goal Checklist.
-10. Unless every non-deferred checklist item is done, a stop rule triggers, or the user explicitly requested only this slice/workstream, continue with the next highest-value unblocked checklist item or workstream.
+10. Unless every non-deferred checklist item is done, a stop rule triggers, or the user explicitly requested only this slice/workstream, continue with the next highest-value unblocked checklist item or workstream and create a fresh scratchpad for it.
 
 ## Pivot Rules
 - If a hypothesis is disproven, mark it disproven and choose the next best workstream.
-- If a new bottleneck or risk appears, add it to the ledger with evidence before changing direction.
+- If a new bottleneck or risk appears, add it to the scratchpad with evidence before changing direction.
 - If validation is noisy, repeat or narrow the experiment before claiming success.
 - If external docs or SDK behavior conflict with the route, record the conflict and decide whether it is a local implementation detail or a stop-rule issue.
 - If the first slice expands beyond a few-hour closure, defer stretch work and close the verified slice first.
@@ -419,77 +400,69 @@ Classify major work areas as:
 - Do not stop just because W1, the first slice, or the active slice is done while the Whole Goal Checklist still has unblocked `todo` or `doing` items.
 ```
 
-## Ledger Template
+## Scratchpad Template
 
-Create this only in execute mode. The ledger is the agent's active-slice execution state.
+Create this only in execute or continue mode. Each scratchpad belongs to exactly one slice.
 
 ```markdown
-# Long-Horizon Ledger: <name>
+# Long-Horizon Scratchpad: <name> / <slice-id>
 
-## Run State
+## Slice State
 - Status: doing
 - Route:
-- Ledger Scope: active slice working memory only
+- Scratchpad:
 - Current branch:
 - Current commit:
-- Active slice:
-- Active workstream:
+- Slice:
+- Source workstream or checklist item:
 - Last updated:
 
 ## Bounds
-- Keep only information needed to resume the active slice.
+- One scratchpad per slice.
+- Keep only information needed to resume this slice.
+- Do not copy the route's Whole Goal Checklist or full Workstreams list.
 - Move durable findings/results/decisions into the route when stable.
-- Archive or reset this ledger when the active slice closes.
+- Stop appending to this scratchpad when the slice closes.
 
-## Task Board
-| ID | Status | Slice | Task | Evidence Needed | Result |
-| --- | --- | --- | --- | --- | --- |
-
-## Validation Surface Status
-| Surface | Status | Command / Method | Last Result | Artifact |
-| --- | --- | --- | --- | --- |
-
-## Experiment Log
-| Time | Hypothesis | Command / Method | Before | After | Conclusion | Artifact |
-| --- | --- | --- | --- | --- | --- | --- |
-
-## Decision Log
-| Time | Decision | Evidence | Tradeoff | Reversal |
-| --- | --- | --- | --- | --- |
-
-## Change Log
-| Commit | Summary | Validation | Risk |
+## Local Tasks
+| Task | Status | Evidence Needed | Result |
 | --- | --- | --- | --- |
+
+## Current Hypothesis
+- <What is being tested or built now>
+- Done when: <slice-local closure condition>
+
+## Recent Evidence
+| Time | Command / Method | Result | Artifact / Notes |
+| --- | --- | --- | --- |
+
+## Temporary Findings
+- <Unstable fact, local observation, or thing to verify before moving to route>
+
+## Open Blockers
+- <Blocker, attempts, and required user input>
 
 ## Commit Plan
 - Cadence:
 - Next commit boundary:
 - Required validation before commit:
 
-## Review-Fix Log
-| Time | Review Pass | Findings | Fixes Applied | Validation After Fix | Converged |
-| --- | --- | --- | --- | --- | --- |
-
-## Discoveries
-- <New fact, bottleneck, risk, or disproven assumption>
-
-## External Spec Checks
-| Time | Source | Version / Date | Finding | Conflict / Action |
+## Review-Fix Notes
+| Time | Findings | Fixes Applied | Validation After Fix | Converged |
 | --- | --- | --- | --- | --- |
-
-## Blockers
-- <Blocker, attempts, and required user input>
 
 ## Next Actions
 1. <Next concrete action>
 2. <Next concrete action>
 
-## Consolidation Checklist
+## Closeout To Route
 - Durable findings copied to route.
 - Completed slice summary added to route.
 - Evidence and artifacts linked from route.
 - Deferred or next-slice work updated in route.
-- Ledger archived or reset if active slice is closed.
+- Active Scratchpad set to `none` or the next slice path.
+- Whole Goal Checklist updated.
+- Scratchpad status set to closed.
 ```
 
 ## Quality Checks
@@ -498,7 +471,7 @@ Before finalizing evaluate mode:
 
 - The suitability decision is explicit.
 - Unsuitable tasks include actionable reasons.
-- Suitable tasks have a route file but no execution ledger yet.
+- Suitable tasks have a route file but no execution scratchpad yet.
 - Large suitable tasks have a Whole Goal Checklist, first autonomous slice, stretch goals, and explicit deferrals.
 - The Whole Goal Checklist is near the top of the route, uses only `done`, `doing`, `todo`, `blocked`, and `deferred`, and tracks outcome-level progress rather than tiny implementation steps.
 - External specs include freshness/version assumptions when relevant.
@@ -510,12 +483,13 @@ Before finalizing evaluate mode:
 
 Before finalizing execute or continue mode:
 
-- The ledger exists and reflects current state.
-- The route remains the source of strategy; the ledger remains the source of execution state.
-- The ledger is bounded to active-slice working memory.
+- The active scratchpad exists and reflects current slice state.
+- The route remains the source of strategy and durable status; the scratchpad remains the source of temporary slice execution state.
+- The scratchpad is bounded to one active slice and does not copy the route's Whole Goal Checklist or full Workstreams list.
 - Closed slice findings/results/decisions are consolidated into the route.
 - The Whole Goal Checklist reflects the current state after any slice closure.
-- If a slice closed, the ledger is archived or reset before starting another slice.
+- If a slice closed, its scratchpad is marked closed before starting another slice.
+- The route's Active Scratchpad points to the current slice scratchpad or `none`.
 - Claims are backed by repeatable evidence.
 - Each commit is preceded by a converged review-fix loop, or the reason no commit was made is recorded.
 - A closed first/active slice is treated as a checkpoint, not a terminal state, unless the user explicitly scoped the run to that slice.

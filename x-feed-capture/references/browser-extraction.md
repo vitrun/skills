@@ -27,7 +27,9 @@ LAST_TIME=YYYY-MM-DD HH:MM
 LAST_HREF=https://x.com/<user>/status/<id>
 ```
 
-Use both values to avoid duplicates. The marker may appear inside the captured slice, not only before it.
+Use both values to avoid duplicates in the Following pass. The marker may appear inside the captured slice, not only before it.
+
+For You is a supplemental discovery source when enabled by prompt or `X_FEED_INCLUDE_FOR_YOU=1`. It may not expose a stable chronological anchor, so do not use it to decide or update `LAST_TIME` / `LAST_HREF`.
 
 ## Open Or Reuse X
 
@@ -56,7 +58,7 @@ Switch to the Following tab, then confirm:
 
 If a `See new posts` button is visible, click it before extraction.
 
-## Scroll And Extract
+## Following Scroll And Extract
 
 Loop until one condition is met:
 
@@ -77,6 +79,19 @@ Extract visible `article[role=article]` elements. Choose the first canonical lin
 
 Keep extraction scripts evaluator-friendly. Prefer DOM walking and string checks over dense regex. If `evaluate` throws parser errors, simplify the page script before adding logic.
 
+## Optional For You Discovery
+
+When the user has requested For You coverage or `X_FEED_INCLUDE_FOR_YOU=1`:
+
+- finish the Following pass first;
+- switch back to the For You tab and confirm it has `aria-selected="true"`;
+- collect about five absolute-scroll pages, for example `0`, `1600`, `3200`, `4800`, `6400`;
+- wait about `2.0-3.0s` after each jump;
+- extract canonical status URLs with the same article parser;
+- merge these candidates into the same pool as Following candidates and de-duplicate by canonical status URL.
+
+Do not treat For You as a second continuation stream unless the user explicitly asks for that. It is a small exploration/discovery sample, so it can surface useful off-graph items but should not advance or overwrite the main marker.
+
 ## Enrichment And Ranking
 
 Open detail pages for likely kept candidates and any card containing `Show more`. Feed-card text can be truncated and miss the core claim.
@@ -90,6 +105,7 @@ Exclude:
 
 - jokes, memes, low-context quips, engagement bait, and low-information links;
 - emotional venting, vulgar content, flamebait, culture-war, or political content;
-- posts already covered by `LAST_TIME` / `LAST_HREF`.
+- Following posts already covered by `LAST_TIME` / `LAST_HREF`;
+- duplicate For You posts already captured from Following.
 
-Rank by relevance, recency, engagement, author credibility, and novelty.
+Rank by relevance, recency, engagement, author credibility, and novelty. Blend Following and For You items into one digest unless the user asks to label or separate sources.

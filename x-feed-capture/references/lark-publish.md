@@ -47,9 +47,9 @@ Rules:
 
 If `LARK_NOTIFY_CHAT_ID` is available, send a short status message:
 
-- Success: fetched count, kept count, approximate time range, and `Document: $LARK_DOC_URL`.
-- No updates: checked time range and `Document: $LARK_DOC_URL`.
-- Failure: failing step, recovery action, and `Document: $LARK_DOC_URL` when available.
+- Success: fetched count, kept count, approximate time range, and `Destination: $LARK_DOC_URL`.
+- No updates: checked time range and `Destination: $LARK_DOC_URL`.
+- Failure: failing step, recovery action, and `Destination: $LARK_DOC_URL` when available.
 
 Skip notification rather than inventing a destination. Do not send success without the configured document link; bootstrap first if `LARK_DOC_URL` is missing.
 
@@ -60,7 +60,7 @@ X Feed Capture: success
 Fetched: 80
 Kept: 8
 Range: since last marker
-Document: https://example.feishu.cn/wiki/...
+Destination: https://example.feishu.cn/wiki/...
 ```
 
 ## State Advancement

@@ -1,0 +1,11 @@
+{
+  "preferences_applied": true,
+  "preference_summary": "Short note on how interested/excluded preferences affected selection and ranking.",
+  "selected_papers": [
+    {
+      "arxiv_id": "2606.12345",
+      "preference_score": 0.0,
+      "why_selected": "One short sentence describing the match to the configured preferences."
+    }
+  ]
+}
