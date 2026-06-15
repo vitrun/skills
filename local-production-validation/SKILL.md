@@ -27,6 +27,15 @@ Prefer the highest feasible level. If choosing level 1 while level 2 or 3 is fea
 
 If level 2 or 3 is blocked, name the specific blocker and the closest validation you can run without pretending it is production-shaped.
 
+Use evidence labels when reporting or recording closeout:
+
+- `unit`: direct module/function tests only.
+- `process-local`: real local process, CLI, server, worker, job, or public entrypoint with local/mock dependencies.
+- `fake-conformance`: provider-neutral contract passed against fake/local implementation.
+- `live-provider`: real external provider/cloud behavior was probed.
+
+Do not use `unit` or in-process smoke to claim process-local behavior. Do not use `fake-conformance` to claim live-provider behavior.
+
 ## Implementation Guardrails
 
 - Identify the production entrypoint and public contract from the repo: proto/IDL, route registration, job trigger, event schema, deployment config, server startup, or worker bootstrap.
@@ -51,8 +60,10 @@ If level 2 or 3 is blocked, name the specific blocker and the closest validation
 Final reporting must include:
 
 - Chosen validation level and why it was appropriate.
+- Evidence label and the exact claim it supports.
 - The real entrypoint or public surface used.
 - The local profile and adapter/mock backend wiring.
 - Exact command or test script used to start or call the component.
 - What was covered: serialization, config, startup, adapter initialization, timeout/error behavior.
-- Any gaps, labeled honestly as smoke-only or not yet production-shaped.
+- Any gaps, labeled honestly as smoke-only, not yet production-shaped, fake-only, or not yet live-provider validated.
+- What the evidence must not be used to claim.

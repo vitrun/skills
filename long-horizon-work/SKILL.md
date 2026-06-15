@@ -219,14 +219,19 @@ Run this loop before every commit and when closing a slice.
    - `record/defer`: real but outside the active slice, low-risk polish, or blocked by a user/product decision.
 3. Fix all `must-fix` and in-scope `should-fix` findings.
 4. Re-run targeted validation after fixes.
-5. Repeat review and fix until a full review pass finds no `must-fix` issues and no in-scope `should-fix` issues.
-6. Record deferred findings in the scratchpad and, if durable, the route.
+5. Review the evidence claim for inflation: the proof must match the claimed evidence level, and the summary must say what is not proven when the validation is lower than the real target.
+6. Repeat review and fix until a full review pass finds no `must-fix` issues, no in-scope `should-fix` issues, and no inflated evidence claim.
+7. Record deferred findings in the scratchpad and, if durable, the route.
 
 Convergence means one clean review pass after the latest fix. If the same issue class persists after repeated attempts, stop only when a stop rule applies or a user/product decision is genuinely required; otherwise keep narrowing and fixing.
 
 ## Route Design
 
 A route is the stable project plan. It should be specific enough to guide hours of work and flexible enough to allow evidence-based pivots.
+
+Before drafting workstreams, classify the route's system profile: `bounded service/API`, `data/algorithm`, `provider/cloud`, `simulator/eval`, `large refactor/migration`, or `mixed`.
+
+If the profile is `data/algorithm`, `provider/cloud`, `simulator/eval`, or `mixed`, read `references/high-risk-route-profiles.md` before writing the route. Use it to add required contracts, sharp-edge guardrails, and evidence labels without copying project-specific cases.
 
 Always include first closure:
 
@@ -244,6 +249,8 @@ Prefer a first slice that:
 - Exercises a thin vertical path through the system.
 - Locks public/API behavior with tests.
 - Avoids the riskiest unproven implementation until there is a spike or test matrix.
+
+For high-risk profiles, the first slice should normally be a production-shaped vertical slice plus an evidence ladder, not a broad implementation pass.
 
 ## Validation Surface Map
 
@@ -290,6 +297,10 @@ Classify major work areas as:
 ```markdown
 # Long-Horizon Route: <name>
 
+## System Profile
+- Profile: <bounded service/API | data/algorithm | provider/cloud | simulator/eval | large refactor/migration | mixed>
+- Validation consequence: <extra contracts/evidence needed, or none>
+
 ## Whole Goal
 <Full project outcome, including later phases.>
 
@@ -331,6 +342,9 @@ Classify major work areas as:
 - <Compatibility rule>
 - <Data/security/destructive-operation rule>
 - <When to ask the user>
+
+## High-Risk Addenda
+For `data/algorithm`, `provider/cloud`, `simulator/eval`, or `mixed` profiles, include the required contracts, sharp-edge register, and evidence claim template from `references/high-risk-route-profiles.md`.
 
 ## Validation Surface Map
 | Surface | Purpose | Command / Method | Required For First Slice |
@@ -473,10 +487,13 @@ Before finalizing evaluate mode:
 - Unsuitable tasks include actionable reasons.
 - Suitable tasks have a route file but no execution scratchpad yet.
 - Large suitable tasks have a Whole Goal Checklist, first autonomous slice, stretch goals, and explicit deferrals.
+- The route has a system profile and the validation consequence matches that profile.
+- Data/algorithm, provider/cloud, simulator/eval, and mixed routes include required contracts, sharp-edge register entries, and an evidence claim template where relevant.
 - The Whole Goal Checklist is near the top of the route, uses only `done`, `doing`, `todo`, `blocked`, and `deferred`, and tracks outcome-level progress rather than tiny implementation steps.
 - External specs include freshness/version assumptions when relevant.
 - Risky areas are marked implement now / spike first / defer / ask user.
 - Validation surfaces are mapped independently from implementation steps.
+- The first autonomous slice proves boundary shape or validation harness before broad implementation when the route profile has high correctness or integration risk.
 - Commit cadence, boundaries, and review-fix requirements are explicit.
 - The route document is not a rigid low-level implementation checklist, but it does include a scannable outcome-level status checklist.
 - The user is told how to start in one short sentence.
@@ -491,6 +508,7 @@ Before finalizing execute or continue mode:
 - If a slice closed, its scratchpad is marked closed before starting another slice.
 - The route's Active Scratchpad points to the current slice scratchpad or `none`.
 - Claims are backed by repeatable evidence.
+- Evidence labels match the actual proof and do not inflate unit, fake, simulator, or local validation into stronger claims.
 - Each commit is preceded by a converged review-fix loop, or the reason no commit was made is recorded.
 - A closed first/active slice is treated as a checkpoint, not a terminal state, unless the user explicitly scoped the run to that slice.
 - A Stop Audit was performed; if any unblocked `todo` or `doing` checklist item remains, execution continues instead of finalizing.
