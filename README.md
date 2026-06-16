@@ -70,8 +70,9 @@ Current tracked upstreams:
 
 ## Research & Feeds
 
-- **alphaxiv-paper-lookup** — Look up an arXiv paper on AlphaXiv for a structured AI-generated overview.
-- **paper-digest** — Fetch, filter, summarize, and optionally publish recent AI/ML paper digests.
+- **paper-lookup** — Look up and explain a single arXiv/AlphaXiv paper.
+- **paper-digest** — Fetch, filter, summarize, and optionally publish recent AI/ML paper roundups.
+- **paper-patterns** — Extract reusable research patterns from papers and maintain an OKF-style pattern library.
 - **x-feed-capture** — Capture, filter, summarize, and optionally publish high-value X/Twitter feed updates.
 
 ## Writing Skills

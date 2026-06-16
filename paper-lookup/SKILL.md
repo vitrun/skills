@@ -1,11 +1,11 @@
 ---
-name: alphaxiv-paper-lookup
-description: Look up any arxiv paper on alphaxiv.org to get a structured AI-generated overview. Use when the user shares an arXiv or AlphaXiv URL, gives a paper ID, or asks to explain, summarize, or analyze a research paper.
+name: paper-lookup
+description: Look up and explain a single arXiv or AlphaXiv research paper, using AlphaXiv's machine-readable overview as the default source. Use when the user shares an arXiv/AlphaXiv URL, gives one paper ID, or asks to explain, summarize, or answer questions about one paper. Do not use for recurring paper digests or maintaining a paper-pattern knowledge library.
 ---
 
-# AlphaXiv Paper Lookup
+# Paper Lookup
 
-Look up any arxiv paper on alphaxiv.org to get a structured AI-generated overview. This is faster and more reliable than trying to read a raw PDF.
+Look up one arXiv paper through AlphaXiv's structured markdown endpoints, then answer the user's question from that report. This is faster and more reliable than starting from a raw PDF.
 
 ## When to Use
 
@@ -13,6 +13,8 @@ Look up any arxiv paper on alphaxiv.org to get a structured AI-generated overvie
 - User mentions a paper ID (e.g. `2401.12345`)
 - User asks you to explain, summarize, or analyze a research paper
 - User shares an alphaxiv URL (e.g. `alphaxiv.org/overview/2401.12345`)
+
+If the user asks to extract reusable research patterns, update an OKF-style pattern library, or create linked pattern/bottleneck/question notes, use `paper-patterns` instead.
 
 ## Workflow
 

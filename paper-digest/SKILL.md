@@ -1,6 +1,6 @@
 ---
 name: paper-digest
-description: Fetch recent AI/ML papers, deduplicate them, curate the digest using agent-level user preferences, publish it to a configured destination such as Lark/Feishu or Obsidian when requested, and notify the result on success, no-op, or failure. Use when the user asks for a paper digest, AlphaXiv hot papers, recent AI research summaries, or publishing a research-paper roundup.
+description: Fetch, deduplicate, curate, publish, and notify recent AI/ML paper roundups using agent-level preferences and configured destinations such as Lark/Feishu or Obsidian. Use when the user asks for a paper digest, AlphaXiv hot papers, recent AI research summaries, or a published research-paper roundup. Do not use for single-paper lookup or OKF-style pattern libraries.
 ---
 
 # Paper Digest

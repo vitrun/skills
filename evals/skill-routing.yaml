@@ -5,19 +5,36 @@
   should_load:
     - paper-digest
   should_not_load:
-    - alphaxiv-paper-lookup
+    - paper-lookup
+    - paper-patterns
 
 - query: "今天的 paper digest 存到 Obsidian vault，不要再发飞书文档"
   should_load:
     - paper-digest
   should_not_load:
-    - alphaxiv-paper-lookup
+    - paper-lookup
+    - paper-patterns
 
 - query: "这篇 arxiv 论文讲什么？2401.12345"
   should_load:
-    - alphaxiv-paper-lookup
+    - paper-lookup
   should_not_load:
     - paper-digest
+    - paper-patterns
+
+- query: "把这篇 paper 提炼成可迁移的 problem pattern 和 solution pattern，并写进 Research Pattern OKF"
+  should_load:
+    - paper-patterns
+  should_not_load:
+    - paper-digest
+    - paper-lookup
+
+- query: "从 2401.12345 抽取 bottleneck、assumption、tradeoff 和 research question，维护到 pattern library"
+  should_load:
+    - paper-patterns
+  should_not_load:
+    - paper-digest
+    - paper-lookup
 
 - query: "跑 x-feed-capture，继续上次的位置，发到飞书"
   should_load:
