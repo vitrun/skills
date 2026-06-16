@@ -3,7 +3,8 @@
 - Missing destination config during a publish run is an onboarding gap. Run Feishu or Obsidian bootstrap before capture unless the user explicitly asked for dry run.
 - `KIMI_WEBBRIDGE_URL` calls may return wrapped `evaluate` payloads under `data.value`; unwrap and null-check before parsing.
 - `find_tab` may legitimately return no open X home tab. Open a fresh authenticated `https://x.com/home` tab and continue the real workflow.
-- X's virtualized timeline can repeat visible cards while loading. Use large absolute scroll jumps with waits before declaring exhaustion.
+- X's virtualized timeline can repeat visible cards while `scrollY` changes, especially after large absolute `scrollTo` jumps. Use incremental wheel/`scrollBy` rounds and require new canonical status links as the health signal before declaring exhaustion.
+- A tiny raw count is suspicious when the previous marker was not reached. Rerun in a fresh X home tab/session with incremental scrolling; if recovery finds materially more links, discard the first raw pass and do not advance state from it.
 - If page-side parser code fails with syntax errors, simplify DOM/string walking. Do not add more regex-heavy logic inside `evaluate`.
 - Detail-page enrichment is valuable for truncated feed cards, but repeated empty bridge results should fall back to feed-card text rather than burning the run.
 - Use `lark-cli docs +update --command block_insert_after --block-id ... --content ...`; older `--mode insert_after --markdown` and `--format` variants have failed in this environment.

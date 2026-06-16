@@ -31,6 +31,7 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
 
 1. **Preflight and config**
    - Load `~/.config/x-feed-capture/config.env` if present.
+   - If `X_FEED_PREFERENCES_FILE` is set, or `~/.config/x-feed-capture/preferences.md` exists, read that local preference file and apply it as user-specific editorial guidance.
    - Resolve `X_FEED_DESTINATION` from explicit env, per-skill config, or global delivery preference. Default to `feishu` for backward compatibility.
    - Verify Kimi WebBridge or a compatible bridge is healthy.
    - If publishing is intended and config is incomplete, bootstrap first. See [references/setup.md](references/setup.md).
@@ -45,15 +46,19 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
    - Confirm the page is logged in and the Following tab is selected. See [references/browser-extraction.md](references/browser-extraction.md).
 
 4. **Capture raw candidates**
-   - Scroll with large absolute jumps and waits.
+   - Capture with incremental wheel/`scrollBy` rounds, not large absolute jumps. X's virtualized timeline can move `scrollY` while repeating the same cards if absolute `scrollTo` is used.
    - Collect canonical `https://x.com/<user>/status/<id>` links from article cards.
-   - Stop only after enough unique links or clear exhaustion according to [references/browser-extraction.md](references/browser-extraction.md).
-   - If For You coverage is enabled by prompt or `X_FEED_INCLUDE_FOR_YOU=1`, switch to For You after the Following pass and mechanically capture about five absolute-scroll pages. Merge those candidates into the same raw candidate pool, de-duplicated by canonical status URL.
+   - Record per-round scroll position, scroll height, visible article count, per-round canonical links, cumulative unique links, and whether the previous `LAST_HREF` was seen.
+   - Stop only after enough unique links, the previous marker is reached, or reliable exhaustion is proven according to [references/browser-extraction.md](references/browser-extraction.md). A low raw count while `scrollY` changes is not reliable exhaustion.
+   - If extraction health is suspect, run the recovery pass before publishing. Do not advance state after a degraded capture unless the user explicitly accepts the gap.
+   - If For You coverage is enabled by prompt or `X_FEED_INCLUDE_FOR_YOU=1`, switch to For You after the Following pass and use the same incremental wheel/`scrollBy` extraction for a small discovery sample. Merge those candidates into the same raw candidate pool, de-duplicated by canonical status URL.
 
 5. **Enrich and rank**
    - Open likely kept status pages, especially cards with `Show more`.
    - Filter manually for information density, AI/technology relevance, recency, author credibility, and novelty relative to the continuation marker where applicable.
+   - Apply any loaded local preference file to resolve editorial questions such as breadth, topic emphasis, language preference, or keep policy.
    - Rank Following and For You candidates together unless the user explicitly asks for separate sections. For You is exploratory; do not require an exact prior marker for it.
+   - Do not infer a fixed kept-item limit from the word "rank"; ranking orders eligible items, while filtering removes only items that fail the keep policy, local preferences, or exclusion rules.
 
 6. **Publish and notify**
    - Publish to the configured destination.
@@ -70,6 +75,7 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
 Report:
 
 - fetched raw link count
+- extraction health classification and whether recovery was needed
 - kept/published item count
 - continuation marker action
 - destination publish/verification status

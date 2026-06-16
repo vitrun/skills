@@ -59,6 +59,7 @@ KIMI_WEBBRIDGE_URL="${KIMI_WEBBRIDGE_URL:-http://127.0.0.1:10086}"
 X_FEED_STATE_FILE="${X_FEED_STATE_FILE:-$HOME/.x_feed_last_fetch}"
 X_FEED_DESTINATION="${X_FEED_DESTINATION:-${CODEX_DELIVERY_DESTINATION:-feishu}}"
 X_FEED_INCLUDE_FOR_YOU="${X_FEED_INCLUDE_FOR_YOU:-0}"
+X_FEED_PREFERENCES_FILE="${X_FEED_PREFERENCES_FILE:-$HOME/.config/x-feed-capture/preferences.md}"
 LARK_DOC_TOKEN="${LARK_DOC_TOKEN:-}"
 LARK_DOC_URL="${LARK_DOC_URL:-}"
 LARK_DOC_ANCHOR_BLOCK_ID="${LARK_DOC_ANCHOR_BLOCK_ID:-}"
@@ -75,15 +76,19 @@ Source durable config before capture:
 [ -f ~/.config/x-feed-capture/config.env ] && . ~/.config/x-feed-capture/config.env
 X_FEED_DESTINATION="${X_FEED_DESTINATION:-${CODEX_DELIVERY_DESTINATION:-feishu}}"
 X_FEED_INCLUDE_FOR_YOU="${X_FEED_INCLUDE_FOR_YOU:-0}"
-printf 'destination=%s\nfor_you=%s\ndoc=%s\nurl=%s\nanchor=%s\nchat=%s\nvault=%s\n' \
+X_FEED_PREFERENCES_FILE="${X_FEED_PREFERENCES_FILE:-$HOME/.config/x-feed-capture/preferences.md}"
+printf 'destination=%s\nfor_you=%s\npreferences=%s\ndoc=%s\nurl=%s\nanchor=%s\nchat=%s\nvault=%s\n' \
   "$X_FEED_DESTINATION" \
   "$X_FEED_INCLUDE_FOR_YOU" \
+  "$X_FEED_PREFERENCES_FILE" \
   "${LARK_DOC_TOKEN:-}" \
   "${LARK_DOC_URL:-}" \
   "${LARK_DOC_ANCHOR_BLOCK_ID:-}" \
   "${LARK_NOTIFY_CHAT_ID:-}" \
   "${OBSIDIAN_VAULT_PATH:-}"
 ```
+
+If `X_FEED_PREFERENCES_FILE` exists, read it during preflight and apply it as local editorial guidance. Keep the skill generic: store user-specific topic emphasis, breadth, language, and keep-policy preferences in that local file rather than editing the skill.
 
 For Feishu publish runs, require:
 
@@ -180,6 +185,7 @@ X_FEED_DESTINATION=obsidian
 OBSIDIAN_VAULT_PATH=/absolute/path/to/vault
 OBSIDIAN_VAULT_NAME=optional-vault-name
 X_FEED_OBSIDIAN_SUBDIR=Clippings/X Feed Capture
+X_FEED_PREFERENCES_FILE=$HOME/.config/x-feed-capture/preferences.md
 EOF
 chmod 600 ~/.config/x-feed-capture/config.env
 ```

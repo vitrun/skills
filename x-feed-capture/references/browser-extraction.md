@@ -63,21 +63,41 @@ If a `See new posts` button is visible, click it before extraction.
 Loop until one condition is met:
 
 - at least 120 unique raw status links were collected;
-- 80 scroll rounds have run;
-- eight consecutive extraction rounds produced no new status links and scroll position is still changing.
+- the previous `LAST_HREF` marker was found in the Following slice;
+- reliable exhaustion is proven by eight consecutive rounds with no new status links and no meaningful timeline progress.
 
-Prefer absolute scrolling over tiny `scrollBy` steps:
+If 80 scroll rounds have run without hitting another stop condition, stop capturing to avoid an unbounded browser session, then classify the output using the health rules below. The round cap alone is not proof of reliable exhaustion.
 
-- jump to `0`, `1600`, `3200`, `4800`, ...
-- wait about `2.0-3.0s` after each jump;
-- record `window.scrollY` and `document.body.scrollHeight`;
-- treat increasing `document.body.scrollHeight` as evidence that X is loading deeper content.
+Use incremental scrolling as the primary method. Do not use large absolute `window.scrollTo(0, N)` jumps for the main pass; X can update `scrollY` while its virtualized timeline keeps repeating the same visible cards.
 
-If `scrollY` changes but canonical links barely change, try deeper jumps and longer waits before declaring exhaustion.
+- sample once at the top after selecting Following;
+- if `See new posts` is visible, click it and sample again;
+- each round dispatches a wheel event and then calls `window.scrollBy(0, 700-1000)`;
+- wait about `1.5-2.5s` after each round;
+- record `window.scrollY`, `document.body.scrollHeight`, visible article count, per-round canonical status URLs, cumulative unique status URLs, and whether `LAST_HREF` appeared;
+- treat increasing unique canonical status URLs as the primary health signal. Increasing `scrollY` or `document.body.scrollHeight` alone is not enough.
+
+Reliable exhaustion requires the visible timeline to stop progressing: no new canonical links, little or no `scrollY` movement, and little or no `document.body.scrollHeight` growth for the final rounds. If `scrollY` changes but canonical links barely change, treat it as a suspect extraction, not exhaustion.
 
 Extract visible `article[role=article]` elements. Choose the first canonical link matching `https://x.com/<user>/status/<id>`. Ignore `/analytics`, `/photo/`, `/video/`, and quoted-post media sublinks.
 
 Keep extraction scripts evaluator-friendly. Prefer DOM walking and string checks over dense regex. If `evaluate` throws parser errors, simplify the page script before adding logic.
+
+### Extraction Health And Recovery
+
+Before publishing, classify the raw capture:
+
+- **healthy**: unique canonical links keep increasing during scroll, or the previous `LAST_HREF` marker was reached.
+- **complete enough**: at least 120 unique links were collected even if the marker was not reached.
+- **suspect**: fewer than 20 unique Following links were collected, the marker was not reached, and scroll position changed; or multiple rounds show the same canonical link set while article cards are visible; or visible article count is nonzero but canonical link extraction is near zero.
+
+For a suspect capture:
+
+1. Open a fresh `https://x.com/home` tab/session, reselect Following, click `See new posts` if present, and rerun the incremental wheel/`scrollBy` pass.
+2. If the recovery pass produces materially more links, discard the suspect raw pass and continue from the recovery output.
+3. If recovery is still suspect, do not publish as a normal success and do not advance `LAST_TIME` / `LAST_HREF`. Report the run as degraded and include the per-round evidence.
+
+When a previous run is discovered to have advanced state after a suspect capture, use the last known pre-suspect marker as the correction baseline for the next repair run. Publish the correction batch only after normal destination verification and notification.
 
 ## Optional For You Discovery
 
@@ -85,8 +105,8 @@ When the user has requested For You coverage or `X_FEED_INCLUDE_FOR_YOU=1`:
 
 - finish the Following pass first;
 - switch back to the For You tab and confirm it has `aria-selected="true"`;
-- collect about five absolute-scroll pages, for example `0`, `1600`, `3200`, `4800`, `6400`;
-- wait about `2.0-3.0s` after each jump;
+- collect about five to eight incremental wheel/`scrollBy` rounds;
+- wait about `1.5-2.5s` after each round;
 - extract canonical status URLs with the same article parser;
 - merge these candidates into the same pool as Following candidates and de-duplicate by canonical status URL.
 
@@ -109,3 +129,5 @@ Exclude:
 - duplicate For You posts already captured from Following.
 
 Rank by relevance, recency, engagement, author credibility, and novelty. Blend Following and For You items into one digest unless the user asks to label or separate sources.
+
+Ranking is not an implicit top-N cap. Unless the prompt or local preferences specify a maximum digest size, keep all candidates that satisfy the keep policy and local preferences. Do not drop relevant high-signal posts solely to make the digest shorter.
