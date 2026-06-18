@@ -72,6 +72,13 @@
     - long-horizon-work
   should_not_load:
     - local-production-validation
+    - deli-autoresearch
+
+- query: "用 Deli AutoResearch protocol 跑一个多天的无人值守研究任务，要有 state files、stall detection 和 heartbeat watchdog"
+  should_load:
+    - deli-autoresearch
+  should_not_load:
+    - long-horizon-work
 
 - query: "给这个 helper 函数补一个单测，本地跑一下"
   should_load:

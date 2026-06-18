@@ -53,3 +53,12 @@ ref = "main"
 commit = "6fd4507659784c351abbd2bc264c7162cfd386dc"
 updated_at = "2026-06-02T07:16:40Z"
 content_hash = "sha256:beb96331d670ba8a565105b05cefb4603d186ae7ab582964f7c973cbc5cbb464"
+
+[[skills]]
+name = "deli-autoresearch"
+repo = "https://github.com/victorchen96/victorchen96.github.io.git"
+path = "auto_research/framework.html"
+ref = "main"
+commit = "550a1a0df038ba46ed41b903fb4bc89724ea0fdf"
+updated_at = "2026-06-17T23:28:55Z"
+content_hash = "sha256:b967aeae1114baadcc9315e781b2406ac254042c837b80853787356f3cb2c443"

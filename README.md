@@ -14,6 +14,7 @@ These skills help you think through problems before writing code.
 - **design-an-interface** — Generate radically different module/interface designs for comparison.
 - **ubiquitous-language** — Extract and normalize a DDD-style glossary from the conversation.
 - **long-horizon-work** — Convert large coding goals into measurable long-running autonomous work packages with validation, guardrails, and launch prompts.
+- **deli-autoresearch** — Protocol framework for unattended long-horizon autonomous research runs with file-backed state, stall detection, and heartbeat watchdogs.
 - **programmable-doc-review** — Audit and tighten technical docs until coding agents can implement them consistently, with clear agent-fill vs human-escalation boundaries.
 - **perspective-context** — Reshape large mixed materials into a focused intermediate representation before audit, diagnosis, or improvement.
 
@@ -67,6 +68,7 @@ Current tracked upstreams:
 - **verification-before-completion** — `git@github.com:obra/superpowers.git//skills/verification-before-completion`
 - **receiving-code-review** — `git@github.com:obra/superpowers.git//skills/receiving-code-review`
 - **finishing-a-development-branch** — `git@github.com:obra/superpowers.git//skills/finishing-a-development-branch`
+- **deli-autoresearch** — `https://github.com/victorchen96/victorchen96.github.io.git//auto_research/framework.html`
 
 ## Research & Feeds
 

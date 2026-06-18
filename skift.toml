@@ -41,3 +41,10 @@ repo = "git@github.com:obra/superpowers.git"
 path = "skills/finishing-a-development-branch"
 ref = "main"
 mode = "guarded"
+
+[[skills]]
+name = "deli-autoresearch"
+repo = "https://github.com/victorchen96/victorchen96.github.io.git"
+path = "auto_research/framework.html"
+ref = "main"
+mode = "guarded"
