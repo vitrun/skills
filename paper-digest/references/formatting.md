@@ -11,11 +11,11 @@ Use this Markdown heading structure exactly when publishing:
 For each paper, include:
 
 - Title.
-- arXiv link and, when available, AlphaXiv link.
+- One link only: prefer arXiv when available, otherwise AlphaXiv.
 - Authors or institutions when useful.
-- One or two bullets for the core problem.
-- One or two bullets for the method.
-- One or two bullets for key insight or result.
+- One grouped `Problem` bullet with one or two sub-bullets.
+- One grouped `Method` bullet with one or two sub-bullets.
+- One grouped `Insight/Result` bullet with one or two sub-bullets.
 
 Keep bullets short and concrete. Avoid copying large abstracts verbatim.
 

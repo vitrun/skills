@@ -21,7 +21,7 @@ Turn research papers into reusable pattern concepts: problem framings, solution 
 
 ## Boundaries
 
-- Use `paper-lookup` for a normal explanation of one arXiv/AlphaXiv paper.
+- Use `paper-reader` for a normal explanation or deep reading of one arXiv/AlphaXiv paper.
 - Use `paper-digest` for recent-paper fetching, curation, publishing, notification, and seen-state updates.
 - Use this skill when the user wants durable pattern-library objects or transfer-oriented research synthesis.
 

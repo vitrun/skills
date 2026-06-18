@@ -106,6 +106,14 @@ def extract_paper(paper: dict[str, Any], source_rank: int) -> dict[str, Any]:
 
 
 def format_markdown(papers: list[dict[str, Any]], run_date: str) -> str:
+    def append_group(label: str, items: list[str]) -> None:
+        cleaned = [item for item in items if str(item).strip()]
+        if not cleaned:
+            return
+        lines.append(f"- {label}:")
+        for item in cleaned:
+            lines.append(f"  - {item}")
+
     lines = [f"## {run_date} Paper Digest", ""]
     if not papers:
         lines.append("No new papers matched after deduplication and preference curation.")
@@ -113,19 +121,15 @@ def format_markdown(papers: list[dict[str, Any]], run_date: str) -> str:
 
     for paper in papers:
         lines.append(f"### {paper['title']}")
-        if paper.get("arxiv_url"):
-            lines.append(f"- arXiv: {paper['arxiv_url']}")
-        if paper.get("alphaxiv_url"):
-            lines.append(f"- AlphaXiv: {paper['alphaxiv_url']}")
+        preferred_link = paper.get("arxiv_url") or paper.get("alphaxiv_url")
+        if preferred_link:
+            lines.append(f"- Link: {preferred_link}")
         if paper.get("authors"):
             lines.append(f"- Authors: {', '.join(paper['authors'])}")
         if paper.get("organizations"):
             lines.append(f"- Institutions: {', '.join(paper['organizations'])}")
-        for item in paper.get("problem") or []:
-            lines.append(f"- **Problem:** {item}")
-        for item in paper.get("method") or []:
-            lines.append(f"- **Method:** {item}")
-        for item in paper.get("insight") or []:
-            lines.append(f"- **Insight/Result:** {item}")
+        append_group("Problem", paper.get("problem") or [])
+        append_group("Method", paper.get("method") or [])
+        append_group("Insight/Result", paper.get("insight") or [])
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"
