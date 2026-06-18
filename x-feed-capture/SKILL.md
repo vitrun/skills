@@ -25,7 +25,7 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
 - Use Following as the primary feed and continuation source. When the user has requested For You coverage or `X_FEED_INCLUDE_FOR_YOU=1`, treat For You as a small supplemental discovery sample, not as the state anchor.
 - Missing durable destination config is a setup task, not a reason to silently downgrade to local dry run.
 - Keep raw extraction, candidate enrichment, ranking, digest writing, publish verification, notification, and state advancement as separate steps.
-- Advance `LAST_TIME` / `LAST_HREF` only after destination publish, destination verification, and any configured notification have succeeded or after the user explicitly accepts a no-notification run.
+- Treat notifications as a user preference. When notifications are enabled, advance `LAST_TIME` / `LAST_HREF` only after destination publish, destination verification, and the configured notification have succeeded. When notifications are disabled, do not send a notification and do not block state advancement on notification.
 
 ## Workflow
 
@@ -33,7 +33,8 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
    - Load `~/.config/x-feed-capture/config.env` if present.
    - If `X_FEED_PREFERENCES_FILE` is set, or `~/.config/x-feed-capture/preferences.md` exists, read that local preference file and apply it as user-specific editorial guidance.
    - Resolve `X_FEED_DESTINATION` from explicit env, per-skill config, or global delivery preference. Default to `feishu` for backward compatibility.
-   - Verify Kimi WebBridge or a compatible bridge is healthy.
+   - Resolve `X_FEED_NOTIFY`; default to enabled only when a notification target such as `LARK_NOTIFY_CHAT_ID` is configured, and respect `X_FEED_NOTIFY=0` as an explicit opt-out.
+   - Resolve the browser backend. Prefer a dedicated Chrome DevTools profile when configured; otherwise use Kimi WebBridge, then Chrome Apple Events only as a last fallback. See [references/browser-extraction.md](references/browser-extraction.md).
    - If publishing is intended and config is incomplete, bootstrap first. See [references/setup.md](references/setup.md).
 
 2. **Read continuation state**
@@ -41,8 +42,8 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
    - Treat missing state as a first run.
 
 3. **Open X Following**
-   - Reuse an existing authenticated X tab when available.
-   - Otherwise open `https://x.com/home` in the configured bridge session.
+   - Reuse or launch the configured authenticated browser backend.
+   - Open `https://x.com/home` in that backend.
    - Confirm the page is logged in and the Following tab is selected. See [references/browser-extraction.md](references/browser-extraction.md).
 
 4. **Capture raw candidates**
@@ -63,11 +64,11 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
 6. **Publish and notify**
    - Publish to the configured destination.
    - Verify the inserted note or section before claiming success.
-   - Send a concise success, no-update, or failure notification with the destination reference.
+   - If notifications are enabled, send a concise success, no-update, or failure notification with the destination reference. If disabled, record `notification=disabled` in the final report.
    - See [references/destinations.md](references/destinations.md).
 
 7. **Commit state**
-   - Overwrite the continuation state file only after destination publish, verification, and configured notification are complete.
+   - Overwrite the continuation state file only after destination publish, verification, and any enabled configured notification are complete.
    - Use `>` overwrite, never `>>` append.
 
 ## Final Report

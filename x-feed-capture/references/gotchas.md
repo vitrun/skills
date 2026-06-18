@@ -1,7 +1,12 @@
 # X Feed Capture Gotchas
 
 - Missing destination config during a publish run is an onboarding gap. Run Feishu or Obsidian bootstrap before capture unless the user explicitly asked for dry run.
+- Prefer the dedicated Chrome DevTools profile when available. It avoids both Kimi WebBridge embedder failures and Chrome Apple Events state drift.
+- Chrome 149+ can reject remote debugging on the default profile with `DevTools remote debugging requires a non-default data directory`; start Chrome with `--user-data-dir` pointing at a persistent dedicated profile.
+- Launch the dedicated DevTools profile with `open -na "Google Chrome" --args ...` on macOS. Direct binary background launches may exit when the window lifecycle changes.
 - `KIMI_WEBBRIDGE_URL` calls may return wrapped `evaluate` payloads under `data.value`; unwrap and null-check before parsing.
+- If Kimi returns `extension API blocked by embedder: unhandled request`, treat it as a browser-control failure and switch backend rather than changing the X parser.
+- If Chrome Apple Events still reports JavaScript execution disabled after the menu item is checked, treat Apple Events as failed. Do not spend the capture budget retrying it.
 - `find_tab` may legitimately return no open X home tab. Open a fresh authenticated `https://x.com/home` tab and continue the real workflow.
 - X's virtualized timeline can repeat visible cards while `scrollY` changes, especially after large absolute `scrollTo` jumps. Use incremental wheel/`scrollBy` rounds and require new canonical status links as the health signal before declaring exhaustion.
 - A tiny raw count is suspicious when the previous marker was not reached. Rerun in a fresh X home tab/session with incremental scrolling; if recovery finds materially more links, discard the first raw pass and do not advance state from it.

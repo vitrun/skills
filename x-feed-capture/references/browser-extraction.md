@@ -1,16 +1,16 @@
 # X Browser Extraction
 
-## Bridge Health
+## Browser Backend Health
 
-Before browser commands:
+Resolve the browser backend before opening X. Use the first healthy authenticated backend:
 
-```bash
-~/.kimi-webbridge/bin/kimi-webbridge status
-```
+1. **DevTools dedicated profile** (`X_FEED_BROWSER_BACKEND=devtools` or `auto`): check `${X_FEED_DEVTOOLS_URL:-http://127.0.0.1:9222}/json/version`. If it is not listening and `X_FEED_DEVTOOLS_LAUNCHER` is executable, run that launcher and recheck. The profile must be a non-default Chrome profile logged into X.
+2. **Kimi WebBridge** (`X_FEED_BROWSER_BACKEND=kimi` or `auto`): check `~/.kimi-webbridge/bin/kimi-webbridge status` or `${KIMI_WEBBRIDGE_URL:-http://127.0.0.1:10086}/status`. Continue only when the daemon and extension/session are connected.
+3. **Chrome Apple Events** (`X_FEED_BROWSER_BACKEND=apple-events` or last `auto` fallback): use only when Chrome's `View > Developer > Allow JavaScript from Apple Events` is enabled and a small `execute javascript` probe succeeds.
 
-Continue only when the daemon and extension/session are connected. Do not continue with commands that would silently fail.
+Do not continue with commands that silently fail or return an empty page. If all backends fail, stop before capture and report a browser-control failure.
 
-When using bridge `evaluate`, inspect wrapped return shapes such as `{"type":"string","value":"..."}` before dereferencing.
+When using Kimi bridge `evaluate`, inspect wrapped return shapes such as `{"type":"string","value":"..."}` before dereferencing. When using DevTools, use `Runtime.evaluate` against the X page target returned by `/json/list`; do not read cookies or browser profile storage.
 
 ## Continuation State
 
@@ -33,6 +33,32 @@ For You is a supplemental discovery source when enabled by prompt or `X_FEED_INC
 
 ## Open Or Reuse X
 
+### Preferred: Chrome DevTools Dedicated Profile
+
+Use a persistent non-default profile. If needed, start it with:
+
+```bash
+"${X_FEED_DEVTOOLS_LAUNCHER:-$HOME/.chrome-profiles/x-feed-debug/start-x-feed-debug-chrome.sh}"
+```
+
+Then verify and locate an X page target:
+
+```bash
+curl -s --max-time 5 "${X_FEED_DEVTOOLS_URL:-http://127.0.0.1:9222}/json/version"
+curl -s --max-time 5 "${X_FEED_DEVTOOLS_URL:-http://127.0.0.1:9222}/json/list"
+```
+
+If no `type:"page"` target for `https://x.com/` exists, open one:
+
+```bash
+curl -s --max-time 5 -X PUT \
+  "${X_FEED_DEVTOOLS_URL:-http://127.0.0.1:9222}/json/new?https://x.com/home"
+```
+
+Use the page target's `webSocketDebuggerUrl` with the Chrome DevTools Protocol. Confirm the page title or body indicates authenticated X home, for example `Home / X`, normal timeline tabs, and feed articles. If it shows the X landing/login page, stop and ask the user to log into the dedicated profile once.
+
+### Fallback: Kimi WebBridge
+
 Prefer an existing authenticated tab:
 
 ```bash
@@ -48,6 +74,18 @@ curl -s -X POST "$KIMI_WEBBRIDGE_URL/command" \
   -H 'Content-Type: application/json' \
   -d '{"action":"navigate","args":{"url":"https://x.com/home","newTab":true},"session":"x-feed"}'
 ```
+
+### Last Fallback: Chrome Apple Events
+
+Use Apple Events only after DevTools and Kimi are unavailable. First run a minimal probe:
+
+```applescript
+tell application "Google Chrome"
+  execute active tab of front window javascript "JSON.stringify({href: location.href, title: document.title})"
+end tell
+```
+
+If Chrome reports that JavaScript from Apple Events is disabled even when the menu appears checked, treat that backend as failed instead of retrying extraction.
 
 Switch to the Following tab, then confirm:
 

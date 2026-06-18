@@ -132,4 +132,4 @@ else
 fi
 ```
 
-Advance `LAST_TIME` / `LAST_HREF` only after the readback checks pass and notification succeeds or is explicitly skipped.
+Advance `LAST_TIME` / `LAST_HREF` only after the readback checks pass and any enabled configured notification succeeds. If notifications are disabled by `X_FEED_NOTIFY=0`, skip notification and do not treat that as an exception.
