@@ -28,6 +28,15 @@ Use this skill to keep a skills repository small, routable, executable, and safe
 6. Update `README.md` only after the skill list, status, and vendoring surface are clear.
 7. Run validation before claiming completion.
 
+## Feedback Improvement Loop
+
+When the user critiques an agent's own skill behavior, routing, output format, validation discipline, or repeated mistakes:
+
+1. Read the relevant `SKILL.md`, support files, README/index entries, and routing evals before proposing changes.
+2. Convert the feedback into the smallest repo-local artifact that prevents recurrence: skill text, reference gotcha, script/check, or routing eval.
+3. If the user asked for ideas only, report the proposed diff shape and wait. If the user asked to change it, edit directly.
+4. Validate the change and report the exact writeback added.
+
 ## Heuristics
 
 - If the agent would recreate the same parsing, validation, or formatting code every run, add a script.

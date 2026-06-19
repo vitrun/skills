@@ -92,7 +92,26 @@
   should_not_load:
     - write-a-skill
 
+- query: "你这个 skill 老是跳过 setup step，帮我把规则沉淀进去，之后别再犯"
+  should_load:
+    - skill-maintenance
+  should_not_load:
+    - write-a-skill
+    - systematic-debugging
+
+- query: "这个 self-improving workflow skills 的思路，看看能不能吸收到现有技能仓库"
+  should_load:
+    - skill-maintenance
+  should_not_load:
+    - write-a-skill
+
 - query: "帮我创建一个新的 skill，用来处理数据库迁移排障"
+  should_load:
+    - write-a-skill
+  should_not_load:
+    - skill-maintenance
+
+- query: "想做一个新 skill，里面要明确任务分解、验证规则、输出格式和用户偏好"
   should_load:
     - write-a-skill
   should_not_load:
