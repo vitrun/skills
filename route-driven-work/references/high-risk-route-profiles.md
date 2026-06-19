@@ -1,6 +1,6 @@
 # High-Risk Route Profiles
 
-Use this reference when a long-horizon route is not a simple bounded API/service task. Load it for `data/algorithm`, `provider/cloud`, `simulator/eval`, and `mixed` profiles.
+Use this reference when a route-driven work route is not a simple bounded API/service task. Load it for `data/algorithm`, `provider/cloud`, `simulator/eval`, and `mixed` profiles.
 
 ## Profile Guidance
 

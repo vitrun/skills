@@ -13,7 +13,7 @@ Apply this to services, workers, jobs, serverless functions, adapters, and cloud
 
 Do not trigger this for pure library functions, UI-only checks, narrow unit tests, or ordinary build/lint/test requests unless the user explicitly asks for production-shaped local validation.
 
-If `long-horizon-work` also applies, use that skill for route/ledger control and this skill for the validation plan and evidence standard.
+If `route-driven-work` also applies, use that skill for route/scratchpad control and this skill for the validation plan and evidence standard.
 
 ## Validation Level Gate
 

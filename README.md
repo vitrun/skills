@@ -13,7 +13,8 @@ These skills help you think through problems before writing code.
 - **grill-me** — Get relentlessly interviewed about a plan or design until every branch of the decision tree is resolved.
 - **design-an-interface** — Generate radically different module/interface designs for comparison.
 - **ubiquitous-language** — Extract and normalize a DDD-style glossary from the conversation.
-- **long-horizon-work** — Convert large coding goals into measurable long-running autonomous work packages with validation, guardrails, and launch prompts.
+- **route-driven-work** — Convert route-clear coding goals into durable work routes with slice scratchpads, validation, guardrails, and commit discipline.
+- **frontier-search** — Search experiment axes for better Pareto frontiers before choosing an implementation route.
 - **deli-autoresearch** — Protocol framework for unattended long-horizon autonomous research runs with file-backed state, stall detection, and heartbeat watchdogs.
 - **programmable-doc-review** — Audit and tighten technical docs until coding agents can implement them consistently, with clear agent-fill vs human-escalation boundaries.
 - **perspective-context** — Reshape large mixed materials into a focused intermediate representation before audit, diagnosis, or improvement.

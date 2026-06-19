@@ -1,0 +1,4 @@
+interface:
+  display_name: "Frontier Search"
+  short_description: "Search experiment spaces for better Pareto frontiers."
+  default_prompt: "Use $frontier-search to find a better Pareto frontier by defining objectives, experiment axes, candidates, evidence, and stop rules."

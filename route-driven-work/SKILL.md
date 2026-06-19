@@ -1,13 +1,15 @@
 ---
-name: long-horizon-work
-description: Assess, start, and continue long-running autonomous coding work. Use when a user asks whether a coding task is suitable for long-horizon work, wants a goal/spec converted into a long-horizon-route-<slug>.md file, asks to execute a long-horizon route, or asks to resume/continue using the route and active per-slice scratchpad.
+name: route-driven-work
+description: Convert clear outcome-driven coding goals into route-driven autonomous work, then execute or continue them with per-slice scratchpads, validation, and commit discipline. Use when the target is stable enough to plan as a route with repeatable evidence. Do not use for open-ended SOTA, experiment-space, or Pareto frontier search; use frontier-search instead.
 ---
 
-# Long Horizon Work
+# Route Driven Work
 
-Use this skill as the workflow for long-running autonomous coding tasks. Match the user's language in outputs.
+Use this skill as the workflow for route-clear autonomous coding tasks. The defining feature is not elapsed time; it is that the desired outcome is stable enough to write a route, decompose workstreams, validate progress, and preserve state between slices. Match the user's language in outputs.
 
-Long-horizon work has a default git discipline: choose a commit cadence that fits the route, and before every commit run a review-fix loop until issues converge. Do this even when the user does not explicitly ask for it.
+Use `frontier-search` instead when the main task is to discover which technical direction, experiment axis, or Pareto tradeoff is best. Use `deli-autoresearch` only when the user explicitly asks for unattended orchestration, watchdogs, heartbeat checks, or the Deli AutoResearch protocol.
+
+Route-driven work has a default git discipline: choose a commit cadence that fits the route, and before every commit run a review-fix loop until issues converge. Do this even when the user does not explicitly ask for it.
 
 Choose the mode from the request:
 
@@ -19,7 +21,7 @@ If the user only provides a new goal/spec, default to `evaluate`. If the user sa
 
 ## Goal Boundary And Stop Discipline
 
-In `execute` and `continue` mode, the route's `Whole Goal` is the default completion target. The `First Autonomous Slice` is an early checkpoint for validation and commit discipline, not permission to stop the long-horizon run.
+In `execute` and `continue` mode, the route's `Whole Goal` is the default completion target. The `First Autonomous Slice` is an early checkpoint for validation and commit discipline, not permission to stop the route-driven run.
 
 The route's `Whole Goal Checklist` is the authoritative progress view. Keep it near the top of the route, update it at every slice boundary, and use only these status values:
 
@@ -56,7 +58,7 @@ If stopping before the `Whole Goal`, state the exact stop rule, user-scoped targ
 
 ## Mode: Evaluate
 
-Evaluate whether the source task is suitable for long-horizon autonomous work.
+Evaluate whether the source task is suitable for route-driven autonomous work.
 
 Classify it as:
 
@@ -68,7 +70,7 @@ Prefer `Suitable` when most are true:
 
 - The goal is valuable, non-trivial, and likely to take more than 30-60 minutes.
 - Success can be measured by tests, benchmarks, profiles, screenshots, static checks, logs, error rates, migration counts, or other repeatable evidence.
-- The path is uncertain enough to benefit from exploration, but the desired outcome is clear.
+- The path may need local investigation, but the desired outcome and route shape are clear enough to plan.
 - The agent can inspect the repo, run commands, make incremental changes, and verify results locally or in a safe test environment.
 - Boundaries, non-goals, safety rules, and rollback expectations can be written down.
 - Progress can be preserved outside context.
@@ -89,6 +91,7 @@ Prefer `Not suitable` when:
 - The work is destructive, security-sensitive, legal/financial/medical high stakes, or likely to touch user data without clear approvals.
 - The task requires frequent human decisions or live operational access.
 - The requested outcome is so vague that an agent would invent success criteria.
+- The core work is SOTA discovery, experiment-axis search, or finding a better Pareto frontier before a route can be chosen.
 
 ### Evaluate Output
 
@@ -101,8 +104,8 @@ Produce:
 
 If working in a repo or file-producing context, write only the route file during evaluate. Prefer:
 
-- `docs/long-horizon-route-<slug>.md`
-- or a specific scoped path such as `docs/long-horizon-route-janus-image-api.md`
+- `docs/work-route-<slug>.md`
+- or a specific scoped path such as `docs/work-route-janus-image-api.md`
 
 Do not create a scratchpad during evaluate. Scratchpads belong to execution state and are created only when `execute` or `continue` starts a slice. The route must name the scratchpad naming pattern.
 
@@ -111,7 +114,7 @@ The route must include a `Commit Plan` that chooses a cadence, names commit boun
 In `How To Start`, tell the user simply:
 
 ```text
-This route is ready. Optionally clear context, then ask Codex to use long-horizon-work to execute <route-path>.
+This route is ready. Optionally clear context, then ask Codex to use route-driven-work to execute <route-path>.
 ```
 
 ## Mode: Execute
@@ -120,11 +123,11 @@ Use this when the user asks to start or execute a route.
 
 Steps:
 
-1. Locate the route document from the user's path or common names such as `docs/long-horizon-route-*.md`.
+1. Locate the route document from the user's path or common names such as `docs/work-route-*.md`, with `docs/long-horizon-route-*.md` supported only as a legacy name.
 2. Read the route and relevant source/spec if referenced.
 3. Inspect `git status`.
 4. Select the first active slice from the route.
-5. Create a scratchpad for that slice using the route's naming pattern, normally `docs/long-horizon-scratchpad-<slug>-<slice-id>.md`, and set the route's `Active Scratchpad` to that path.
+5. Create a scratchpad for that slice using the route's naming pattern, normally `docs/work-scratchpad-<slug>-<slice-id>.md`, and set the route's `Active Scratchpad` to that path.
 6. Initialize the scratchpad as local working memory for that slice with slice state, local tasks, current hypothesis, recent evidence, temporary findings, blockers, review-fix notes, and next actions.
 7. Choose and record the commit cadence for the active slice if the route does not already specify one.
 8. Execute the first autonomous slice from the route.
@@ -144,13 +147,13 @@ Steps:
 
 ## Mode: Continue
 
-Use this when the user asks to resume after interruption, context clearing, or an earlier long run.
+Use this when the user asks to resume after interruption, context clearing, or an earlier route-driven run.
 
 Steps:
 
 1. Locate the route document:
    - use the user's explicit path, or
-   - search common route names such as `docs/long-horizon-route-*.md`, or
+   - search common route names such as `docs/work-route-*.md`, with `docs/long-horizon-route-*.md` supported only as a legacy name, or
    - ask only if multiple plausible routes exist and choosing one would be risky.
 2. Locate the active scratchpad from the route:
    - use the route's active scratchpad path if present, or
@@ -170,8 +173,10 @@ If the active scratchpad is missing, do not invent prior temporary state. Create
 
 Use exactly two artifact types:
 
-- `long-horizon-route-<slug>.md` is durable project memory. It stores the strategy, stable findings, completed slice summaries, verified results, durable decisions, disproven hypotheses, updated risks, deferred work, and next slices.
-- `long-horizon-scratchpad-<slug>-<slice-id>.md` is temporary working memory for one slice. It stores only the state needed to resume that slice: local tasks, current hypothesis, recent evidence, temporary findings, blockers, review-fix notes, and next actions.
+- `work-route-<slug>.md` is durable project memory. It stores the strategy, stable findings, completed slice summaries, verified results, durable decisions, disproven hypotheses, updated risks, deferred work, and next slices.
+- `work-scratchpad-<slug>-<slice-id>.md` is temporary working memory for one slice. It stores only the state needed to resume that slice: local tasks, current hypothesis, recent evidence, temporary findings, blockers, review-fix notes, and next actions.
+
+Legacy `long-horizon-route-*` and `long-horizon-scratchpad-*` artifacts may exist from older runs. Read and continue them when referenced, but prefer the `work-*` names for new routes and scratchpads.
 
 The route is the index: its `Active Scratchpad` section records the current scratchpad path or `none`.
 
@@ -295,7 +300,7 @@ Classify major work areas as:
 ## Route Template
 
 ```markdown
-# Long-Horizon Route: <name>
+# Route-Driven Work: <name>
 
 ## System Profile
 - Profile: <bounded service/API | data/algorithm | provider/cloud | simulator/eval | large refactor/migration | mixed>
@@ -314,7 +319,7 @@ Classify major work areas as:
 
 ## Active Scratchpad
 - Current: none
-- Naming: `docs/long-horizon-scratchpad-<slug>-<slice-id>.md`
+- Naming: `docs/work-scratchpad-<slug>-<slice-id>.md`
 - Rule: one scratchpad per slice. Create it only when execution starts or a new slice begins.
 
 ## Success Criteria
@@ -419,7 +424,7 @@ For `data/algorithm`, `provider/cloud`, `simulator/eval`, or `mixed` profiles, i
 Create this only in execute or continue mode. Each scratchpad belongs to exactly one slice.
 
 ```markdown
-# Long-Horizon Scratchpad: <name> / <slice-id>
+# Work Scratchpad: <name> / <slice-id>
 
 ## Slice State
 - Status: doing

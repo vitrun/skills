@@ -57,9 +57,10 @@
 
 - query: "这个任务适不适合做成长程工作？如果适合生成 route.md"
   should_load:
-    - long-horizon-work
+    - route-driven-work
   should_not_load:
     - prd-to-plan
+    - frontier-search
 
 - query: "帮我本地 validate 这个 serverless job，按真实 event contract 触发，云上的队列和存储先 adapter/mock"
   should_load:
@@ -69,16 +70,31 @@
 
 - query: "这个 long-running task 适不适合做成长程工作？先生成 route.md"
   should_load:
-    - long-horizon-work
+    - route-driven-work
   should_not_load:
     - local-production-validation
     - deli-autoresearch
+    - frontier-search
+
+- query: "围绕这个目标探索 SOTA 空间，组合模型、prompt、检索和评测轴，找有没有更好的 Pareto frontier"
+  should_load:
+    - frontier-search
+  should_not_load:
+    - route-driven-work
+    - deli-autoresearch
+
+- query: "先不要写固定路线，帮我定义实验轴和 candidate ledger，看看质量、成本、延迟有没有更好的 tradeoff"
+  should_load:
+    - frontier-search
+  should_not_load:
+    - route-driven-work
 
 - query: "用 Deli AutoResearch protocol 跑一个多天的无人值守研究任务，要有 state files、stall detection 和 heartbeat watchdog"
   should_load:
     - deli-autoresearch
   should_not_load:
-    - long-horizon-work
+    - route-driven-work
+    - frontier-search
 
 - query: "给这个 helper 函数补一个单测，本地跑一下"
   should_load:
