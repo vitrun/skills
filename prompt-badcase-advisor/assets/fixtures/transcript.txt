@@ -1,0 +1,2 @@
+User: What happens next?
+Assistant: The story ends here and a new scenario begins.

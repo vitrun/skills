@@ -56,8 +56,10 @@ Goals:
 
 - identify 2-3 highest-leverage interview lines
 - connect each line to resume claims and JD requirements when available
-- create project-grounded opening questions
-- provide follow-up paths for ownership, depth, tradeoffs, execution, failure, and learning
+- create practical question and follow-up pairs that can be asked directly in an interview
+- fold technical deep dives into each interview line instead of creating a separate generic technical-question section
+- provide follow-up paths for ownership, data, modeling, system design, experiment quality, failure, and learning
+- include targeted Easy/Medium coding questions when coding is relevant or requested
 - define what evidence should be captured during the interview
 
 Do not try to evaluate the candidate yet except as clearly labeled hypotheses or risk areas. The output should help the interviewer ask better questions and gather evidence.
@@ -127,22 +129,25 @@ Never stop at terminology, framework names, or architecture diagrams. Strong evi
 
 1. Prefer real project discussion over knowledge questions.
 2. Collapse broad resumes into 2-3 deep interview lines. Do not turn every resume bullet into a standalone topic.
-3. For each major project, verify ownership:
+3. Make interview lines directly usable: each line should contain concrete `Question` / `Follow-ups` pairs, not only an opening question plus abstract themes.
+4. Integrate technical depth into the follow-ups for each line. Do not create a standalone `Technical Deep Dive Questions` section when those questions can be attached to the relevant project line.
+5. For each major project, verify ownership:
    - who proposed it
    - who designed it
    - who implemented it
    - who operated it
    - who was accountable for outcomes
-4. Quantify everything relevant:
+6. Quantify everything relevant:
    - QPS, DAU, latency, throughput, token volume, machine count, cost, incidents, team size, delivery time, adoption, revenue, or error rate
-5. Follow decisions:
+7. Follow decisions:
    - alternatives considered
    - why this design won
    - tradeoffs accepted
    - what broke later
-6. Follow failures:
+8. Follow failures:
    - bottlenecks, outages, incorrect assumptions, scaling limits, redesigns, and operational lessons
-7. Use textbook or definition questions only as a fallback when project evidence is absent or a claimed foundation needs quick calibration.
+9. Use textbook or definition questions only as a fallback when project evidence is absent or a claimed foundation needs quick calibration.
+10. When coding questions are requested or useful, provide exactly two targeted questions by default: one Easy warm-up and one Medium main problem. Tie each question to the candidate's resume or role domain, and include follow-ups that reveal practical engineering judgment.
 
 ## Builder Verification
 
@@ -173,43 +178,43 @@ Use this structure for interview preparation:
 ## Risk Areas
 - [Ownership, scale evidence, unclear contribution, suspicious breadth, or role mismatch]
 
-# Interview Strategy
-[Recommended breadth/depth/ownership/architecture validation approach. Explain why these 2-3 lines are highest leverage.]
-
 # Interview Lines
 
 ## Line 1: [Theme]
 
-### Opening Question
-[Project-grounded question.]
+### Why This Line
+[The JD/resume claim, capability, or risk this line validates.]
 
-### Purpose
-[Capability being validated.]
+### Question 1
+[Project-grounded question the interviewer can ask verbatim.]
+
+#### Follow-ups
+1. Ownership: [Who designed, implemented, operated, and was accountable?]
+2. Data and labels: [Samples, data contracts, bias, freshness, quality, leakage, or evaluation set.]
+3. Model or algorithm: [Architecture, objective, losses, features, alternatives, or ablations.]
+4. Serving or system: [Online path, latency, QPS, cost, update, monitoring, rollback, or failure mode.]
+5. Metrics and attribution: [Offline/online metrics, A/B design, guardrails, denominator, confidence, and causality.]
+6. Failure and lesson: [What broke, what was learned, and what would change now.]
+
+#### Strong Signals
+- [Concrete answer detail that suggests Builder-level depth.]
+
+#### Weak Signals
+- [Vague, inflated, or risky answer pattern.]
+
+### Question 2
+[A second targeted question, usually deeper or adjacent to the first. It should drill into a technical risk instead of introducing a new resume bullet.]
+
+#### Follow-ups
+1. [Technical drilldown tied to this project.]
+2. [Production or metric drilldown tied to this project.]
+3. [Ownership or failure drilldown tied to this project.]
 
 ### Strong Signals
-- [What a strong answer contains.]
+- [What a strong answer contains across the line.]
 
 ### Weak Signals
-- [What needs follow-up or concern.]
-
-### Follow-up Path
-1. [Decision and alternatives]
-2. [Implementation and interfaces]
-3. [Scale, metrics, and constraints]
-4. [Failure, operation, and lessons]
-
-# Technical Background
-
-## [Topic]
-
-### Background
-[Brief concept summary for the interviewer.]
-
-### Industry Practice
-[Common production approach.]
-
-### Common Mistakes
-[Typical misconceptions or shallow answers.]
+- [What needs follow-up or concern across the line.]
 
 # Resume Authenticity Checks
 
@@ -221,6 +226,46 @@ Use this structure for interview preparation:
 
 ## Evidence Capture Guide
 - [What answer detail should be captured for later evaluation.]
+
+# Coding Questions
+
+## Coding 1: Easy - [Targeted title]
+
+### Problem
+[A concise problem statement. Prefer a known Easy problem or a small domain-shaped variant.]
+
+### Why This Fits
+[Why this is relevant to the candidate's claimed work or the role.]
+
+### Expected Solution
+- [Core data structure or algorithm.]
+- [Time and space complexity.]
+
+### Follow-ups
+1. [Small constraint change that tests boundary handling.]
+2. [Streaming, memory, scale, or production-oriented variant when relevant.]
+
+### Strong Signals
+- [What a solid implementation and explanation should show.]
+
+## Coding 2: Medium - [Targeted title]
+
+### Problem
+[A concise problem statement. Prefer a known Medium problem or a role-relevant variant.]
+
+### Why This Fits
+[Why this is relevant to the candidate's claimed work or the role.]
+
+### Expected Solution
+- [Core data structure or algorithm.]
+- [Time and space complexity.]
+
+### Follow-ups
+1. [Engineering extension tied to the role.]
+2. [Edge case, scaling, or correctness probe.]
+
+### Strong Signals
+- [What a solid implementation and explanation should show.]
 
 ## Next Stage Input Needed
 - [Interview answers, transcript, or notes needed for Q&A organization.]

@@ -9,6 +9,27 @@ Use this skill when the objective is stable but the best route is unknown. Turn 
 
 This skill may borrow the memory discipline of `route-driven-work`, but the durable object is a frontier state, not a fixed route. Use `deli-autoresearch` only when the user explicitly wants unattended orchestration, watchdogs, heartbeat checks, or the Deli AutoResearch protocol.
 
+For ML/LLM, data, prompt, judge, scanner, or benchmark frontiers where metrics can be gamed, also read `references/ml-llm-frontier-hygiene.md` before planning or accepting a candidate.
+Treat that reference as a hard-gate protocol for meaningful ML/LLM training,
+prompt, judge, scanner, or benchmark runs: do not start the next run until the
+previous run has a recorded closeout and the next run is explicitly permitted.
+
+## Lesson Operationalization
+
+A frontier lesson is not durable until it changes the search machinery. Treat a
+recurring insight, failure attribution, or review finding as unimplemented until
+it becomes at least one of:
+
+- a pre-run permission blocker;
+- a stop rule or closed-axis rule with a narrow reopen condition;
+- a provider, prompt, or materialization gate;
+- a trainer, eval, judge, scanner, or review checklist requirement;
+- a reproducible script, probe, or artifact contract.
+
+Do not approve a next experiment merely because the lesson is mentioned in a
+scratchpad or closeout. If a later candidate can bypass the lesson without
+tripping a gate, the frontier state has not learned it yet.
+
 ## Boundary
 
 Use `frontier-search` for:
@@ -44,6 +65,8 @@ At round close, consolidate durable results into the frontier state, mark the sc
 4. Choose the next experiment round.
    - Pick a small candidate set that maximizes expected frontier movement per unit cost.
    - Include at least one falsification or negative-control check when metric gaming is plausible.
+   - For ML/LLM frontiers, record the metric-gaming pre-mortem, data or prompt reward-shape audit, and any trainer/eval code-review gate before compute spend.
+   - For ML/LLM frontiers, stop before selecting another meaningful run if the previous run lacks the closeout required by `references/ml-llm-frontier-hygiene.md`.
 5. Run and record evidence.
    - Keep commands, configs, seeds, data slices, versions, and result artifacts sufficient for repeatability.
    - Label evidence fidelity: toy, offline benchmark, simulator, live-provider, shadow, or canary.
@@ -51,8 +74,12 @@ At round close, consolidate durable results into the frontier state, mark the sc
    - A candidate dominates another only when it is no worse on protected metrics and better on at least one target metric under the stated constraints.
    - If candidates trade off, keep both on the frontier and name the decision boundary.
    - Move failed or inferior candidates to dominated/rejected with evidence and reason.
+   - If metric definitions, judges, scanners, prompts, eval templates, trainer mechanics, or manual review rules changed, run a comparability audit before reusing old dominance claims.
+   - Convert new durable lessons into an operational rule before treating the round as closed: blocker, gate, checklist, script, artifact contract, or closed-axis entry.
 7. Decide the next action.
    - Continue broad search, deepen an axis, run ablations, select a route for implementation, or stop.
+   - For ML/LLM frontiers, record whether the next run is allowed or blocked, and why.
+   - If the next move relies on a prior lesson, verify that the corresponding gate or rule exists; otherwise create it before approving the run.
 
 ## Output Shape
 
@@ -73,5 +100,6 @@ Stop or ask the user when:
 - Budget, credentials, data access, safety, or production exposure requires approval.
 - The frontier has not improved after the configured round or budget cap.
 - A candidate is ready to become route-driven implementation work.
+- A near-frontier ML/LLM candidate has not yet had saved-output, taxonomy, and manual or independent review sufficient to rule out metric gaming.
 
 Never claim SOTA or production effect from lower-fidelity evidence. State exactly what the evidence proves, what it does not prove, and what validation would raise confidence.

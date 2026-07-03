@@ -89,6 +89,40 @@
   should_not_load:
     - route-driven-work
 
+- query: "看这些 badcase，帮我归因 prompt 里哪些部分可能导致了这些失败，不要直接改线上 prompt"
+  should_load:
+    - prompt-badcase-advisor
+  should_not_load:
+    - frontier-search
+    - programmable-doc-review
+
+- query: "这里有 prompt.md 和一批 RPB details.jsonl，先做坏例归因和 prompt advice report"
+  should_load:
+    - prompt-badcase-advisor
+  should_not_load:
+    - route-driven-work
+    - write-a-skill
+
+- query: "帮我自动搜索一组 prompt patch，跑 benchmark 后选出胜出版本"
+  should_load:
+    - frontier-search
+  should_not_load:
+    - prompt-badcase-advisor
+
+- query: "这批 preferred/rejected pairs 可能被长度 shortcut 学到，帮我审一下 DPO 数据怎么改"
+  should_load:
+    - harden-preference-data
+  should_not_load:
+    - prompt-badcase-advisor
+    - paper-digest
+
+- query: "继续做 preference data frontier，重点防 reward hacking 和 proxy metric gaming"
+  should_load:
+    - frontier-search
+    - harden-preference-data
+  should_not_load:
+    - route-driven-work
+
 - query: "用 Deli AutoResearch protocol 跑一个多天的无人值守研究任务，要有 state files、stall detection 和 heartbeat watchdog"
   should_load:
     - deli-autoresearch
@@ -120,6 +154,20 @@
     - skill-maintenance
   should_not_load:
     - write-a-skill
+
+- query: "用 gcloud 找个 L4 或 A100 spot 跑 DPO，权重提前准备好，要求可 resume 且别浪费 GPU 时间"
+  should_load:
+    - cloud-gpu-runner
+  should_not_load:
+    - frontier-search
+    - local-production-validation
+
+- query: "AWS 上开一台 G5/P4 GPU 做批量 eval，先查 spot 价格和容量，跑完自动清理"
+  should_load:
+    - cloud-gpu-runner
+  should_not_load:
+    - route-driven-work
+    - paper-digest
 
 - query: "帮我创建一个新的 skill，用来处理数据库迁移排障"
   should_load:

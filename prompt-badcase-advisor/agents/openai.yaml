@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prompt Badcase Advisor"
+  short_description: "Diagnose prompt badcases with evidence"
+  default_prompt: "Use $prompt-badcase-advisor to analyze these badcases against my prompt and produce evidence-backed advice."

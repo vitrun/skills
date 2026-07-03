@@ -97,10 +97,11 @@ Prefer `Not suitable` when:
 
 Produce:
 
-1. `Fit Assessment`
-2. `Route Document`
-3. `How To Start`
-4. `Open Questions Or Assumptions`
+1. `Route Document`
+2. `How To Start`
+3. `Open Questions Or Assumptions`
+
+State the suitability decision briefly when needed, but do not create a separate suitability-assessment heading or section in user-facing output or route files.
 
 If working in a repo or file-producing context, write only the route file during evaluate. Prefer:
 
@@ -110,6 +111,8 @@ If working in a repo or file-producing context, write only the route file during
 Do not create a scratchpad during evaluate. Scratchpads belong to execution state and are created only when `execute` or `continue` starts a slice. The route must name the scratchpad naming pattern.
 
 The route must include a `Commit Plan` that chooses a cadence, names commit boundaries, and requires the pre-commit review-fix loop.
+
+The route must include an `Implementation Blueprint` section when the requested outcome is a concrete system, data, API, UI, migration, or algorithm change. This section is the route's executable design: it must say what will be built and how the core logic works, not just list workstreams. It can use tables, pseudocode, schemas, request/response shapes, SQL/CTE sketches, state machines, dependency graphs, file/module plans, or fixture examples as appropriate. Omit it only for purely exploratory routes where the first slice is explicitly a spike to discover the design.
 
 In `How To Start`, tell the user simply:
 
@@ -248,6 +251,20 @@ Always include first closure:
 
 The checklist is a status surface, not a rigid low-level implementation script. Each item should name an outcome or externally meaningful capability, the evidence that will prove it, and the next action. Avoid filling it with tiny code-edit steps.
 
+Always include an implementation blueprint for route-clear build work. It should capture the current best design at the level needed for another agent to start coding after reading only the route and linked source documents. Prefer concrete names and logic over placeholders. Where discovery is still required, mark the exact unknown and the first action that will resolve it; do not hide unsettled design behind vague phrases like "wire this up" or "implement the logic".
+
+An implementation blueprint should include the relevant subset of:
+
+- Target artifacts: files, modules, tables, endpoints, jobs, commands, configs, or UI surfaces to create or change.
+- Interfaces and contracts: schemas, request/response shapes, event fields, table grain, public APIs, CLI flags, or state records.
+- Core logic: algorithms, formulas, matching rules, SQL CTE flow, state transitions, control flow, validation rules, or error handling.
+- Data/request lineage: input sources, transforms, joins, writes, side effects, idempotency keys, ordering, clocks, and replay behavior.
+- Dependency graph: upstream sources, downstream consumers, generated artifacts, migrations, and rollout dependencies.
+- Edge and rejection paths: DQ branches, invalid inputs, retries, partial failure, duplicate handling, permission failures, and rollback behavior.
+- Verification anchors: fixtures, assertions, golden examples, dry runs, probes, screenshots, metrics, or invariants that prove the blueprint.
+
+For `data/algorithm` routes, the blueprint must be especially concrete about source tables/events, output table or feature grain, filters, joins, aggregation windows, metric formulas, score bounds, dedupe keys, DQ reasons, and downstream consumers. For `bounded service/API` routes, it must name endpoints/handlers, payloads, persistence changes, auth/permission checks, and failure responses. For `provider/cloud` routes, it must name provider resources, capability mappings, config sources, rollout and rollback steps, and live-probe boundaries. For frontend routes, it must name screens, state, interactions, responsive behavior, and validation screenshots.
+
 Prefer a first slice that:
 
 - Builds or strengthens the validation harness.
@@ -326,6 +343,9 @@ Classify major work areas as:
 - <Metric or acceptance criterion>
 - <Correctness/stability criterion>
 - <Regression criterion>
+
+## Implementation Blueprint
+<Concrete implementation design. Include the artifacts, interfaces/contracts, core logic, data/request flow, dependency graph, edge/rejection paths, and verification anchors needed for another agent to begin work from this route. Use pseudocode, SQL/CTE sketches, schemas, state machines, tables, or file/module maps when they make the logic clearer. If any detail is unknown, state exactly how the first slice will discover it.>
 
 ## Non-Goals
 - <Explicitly excluded work>
@@ -491,6 +511,9 @@ Before finalizing evaluate mode:
 - The suitability decision is explicit.
 - Unsuitable tasks include actionable reasons.
 - Suitable tasks have a route file but no execution scratchpad yet.
+- Build routes include an `Implementation Blueprint` unless the first slice is explicitly a design-discovery spike.
+- The blueprint is concrete enough that another agent can identify target artifacts, contracts, core logic, dependencies, edge paths, and verification anchors without relying on chat history.
+- For data/algorithm routes, the blueprint names source data, output grain, filters, joins, aggregation/scoring logic, dedupe keys, DQ/rejection branches, and downstream consumers.
 - Large suitable tasks have a Whole Goal Checklist, first autonomous slice, stretch goals, and explicit deferrals.
 - The route has a system profile and the validation consequence matches that profile.
 - Data/algorithm, provider/cloud, simulator/eval, and mixed routes include required contracts, sharp-edge register entries, and an evidence claim template where relevant.
@@ -501,6 +524,7 @@ Before finalizing evaluate mode:
 - The first autonomous slice proves boundary shape or validation harness before broad implementation when the route profile has high correctness or integration risk.
 - Commit cadence, boundaries, and review-fix requirements are explicit.
 - The route document is not a rigid low-level implementation checklist, but it does include a scannable outcome-level status checklist.
+- The route document is also not a plan-only skeleton: if implementation decisions are settled, they are written in the blueprint rather than deferred to execution without reason.
 - The user is told how to start in one short sentence.
 
 Before finalizing execute or continue mode:

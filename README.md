@@ -15,6 +15,8 @@ These skills help you think through problems before writing code.
 - **ubiquitous-language** — Extract and normalize a DDD-style glossary from the conversation.
 - **route-driven-work** — Convert route-clear coding goals into durable work routes with slice scratchpads, validation, guardrails, and commit discipline.
 - **frontier-search** — Search experiment axes for better Pareto frontiers before choosing an implementation route.
+- **prompt-badcase-advisor** — Diagnose prompt badcases with evidence-backed attribution and human-reviewable advice, without auto-applying prompt patches.
+- **harden-preference-data** — Design shortcut-resistant DPO/RLHF/RLAIF preference data with same-context hard negatives and utility validation.
 - **deli-autoresearch** — Protocol framework for unattended long-horizon autonomous research runs with file-backed state, stall detection, and heartbeat watchdogs.
 - **programmable-doc-review** — Audit and tighten technical docs until coding agents can implement them consistently, with clear agent-fill vs human-escalation boundaries.
 - **perspective-context** — Reshape large mixed materials into a focused intermediate representation before audit, diagnosis, or improvement.
@@ -37,6 +39,7 @@ These skills help you write, refactor, and fix code.
 - **setup-pre-commit** — Set up Husky pre-commit hooks with lint-staged, Prettier, type checking, and tests.
 - **git-guardrails-claude-code** — Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, etc.) before they execute.
 - **skill-maintenance** — Audit and maintain this skills repository: routing descriptions, file splitting, gotchas, scripts, README indexing, and vendored-skill checks.
+- **cloud-gpu-runner** — Use GCP/AWS GPU resources efficiently with artifact staging, Spot resumability, cost/capacity checks, and cleanup discipline.
 
 ## Hiring & Interviews
 

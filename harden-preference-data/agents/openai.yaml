@@ -1,0 +1,4 @@
+interface:
+  display_name: "Harden Preference Data"
+  short_description: "Make preference data resistant to shortcuts"
+  default_prompt: "Use $harden-preference-data to audit this preference dataset plan for shortcut risks before training."

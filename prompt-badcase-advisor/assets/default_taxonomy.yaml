@@ -1,0 +1,41 @@
+heads:
+  REPETITION_OR_STASIS:
+    label: "Repetition or stasis"
+    severity: "high"
+    definition: "The assistant repeats phrasing, actions, emotional beats, or scene state without meaningful progress."
+    evidence_patterns:
+      - repeated_phrase
+      - repeated_action_family
+      - high_turn_overlap
+  USER_AGENCY_VIOLATION:
+    label: "User agency violation"
+    severity: "critical"
+    definition: "The assistant speaks, acts, decides, feels, or narrates internal state for the user."
+    evidence_patterns:
+      - user_internal_state
+      - user_action
+      - user_speech
+  ROLE_OR_FORMAT_BREAK:
+    label: "Role or format break"
+    severity: "high"
+    definition: "The assistant leaves the requested role, exposes analysis, uses generic assistant voice, or violates output format."
+    evidence_patterns:
+      - meta_analysis
+      - generic_assistant_voice
+      - format_break
+  REFUSAL_OR_HARD_END:
+    label: "Refusal or hard end"
+    severity: "high"
+    definition: "The assistant refuses, resets, hard-ends the scene, or starts a new scenario when continuation is expected."
+    evidence_patterns:
+      - refusal
+      - hard_scene_end
+      - reset_scenario
+  CONTEXT_CONTRADICTION:
+    label: "Context contradiction"
+    severity: "medium"
+    definition: "The assistant contradicts role facts, task context, prior turns, or explicit constraints."
+    evidence_patterns:
+      - contradicts_context
+      - contradicts_character
+      - contradicts_user_input
