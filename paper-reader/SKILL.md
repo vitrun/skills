@@ -66,12 +66,12 @@ When the user asks for a full reading rather than a narrow answer, cover the pap
 2. Prior attempts and why they are insufficient.
 3. Reconstructed author reasoning before the method: use only prior work, failure modes, observations, and plausible inspiration; do not use the paper's final contribution as a premise.
 4. Core intuition in plain language.
-5. Concrete method and one end-to-end example: input, processing, output.
-6. Math or theory, with minimal background and intuition if present.
-7. Experiments as question -> experiment -> answer.
-8. Takeaways.
-9. Weakest assumption.
-10. One-week minimum reproduction target.
+5. Methodology / 方法论: explain concretely how the paper does it, including the components, workflow or algorithm steps, inputs and outputs, training or inference pipeline when relevant, and implementation details needed to understand the method without treating it as a black box.
+6. One end-to-end example: input, processing, output.
+7. Math or theory, with minimal background and intuition if present.
+8. Experiments as question -> experiment -> answer.
+9. Takeaways.
+10. Weakest assumption.
 11. Counterexample or attack design.
 12. A non-incremental follow-up idea grounded in limitations and real needs.
 

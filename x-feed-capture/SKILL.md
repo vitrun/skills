@@ -56,6 +56,7 @@ Do not hardcode or commit private document IDs, chat IDs, user paths, account na
 
 5. **Enrich and rank**
    - Open likely kept status pages, especially cards with `Show more`.
+   - Treat a clear feed-card title as enough to pass the initial keep gate when it names a concrete developer tool, technical report, benchmark, model, paper, product launch, or agent-infrastructure claim. Enrich it before excluding; do not silently drop it just because the card came from For You or the body was not opened yet.
    - Filter manually for information density, AI/technology relevance, recency, author credibility, and novelty relative to the continuation marker where applicable.
    - Apply any loaded local preference file to resolve editorial questions such as breadth, topic emphasis, language preference, or keep policy.
    - Rank Following and For You candidates together unless the user explicitly asks for separate sections. For You is exploratory; do not require an exact prior marker for it.

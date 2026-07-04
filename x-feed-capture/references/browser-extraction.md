@@ -154,6 +154,8 @@ Do not treat For You as a second continuation stream unless the user explicitly 
 
 Open detail pages for likely kept candidates and any card containing `Show more`. Feed-card text can be truncated and miss the core claim.
 
+A clear feed-card title is enough to pass the initial keep gate. If the visible title names a concrete developer tool, CLI/version release, technical report, benchmark, model, paper, product launch, or agent-infrastructure claim, keep it as a candidate and enrich it before deciding whether to exclude it. For You items are allowed to enter this gate; do not downrank or drop them solely because they are supplemental discovery rather than the continuation source.
+
 Keep posts with meaningful information density:
 
 - AI, ML, agents, developer tools, infrastructure, product launches, technical analysis, and research.

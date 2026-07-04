@@ -1,6 +1,6 @@
 ---
 name: design-taste-frontend
-description: Anti-slop frontend skill for landing pages, portfolios, and redesigns. The agent reads the brief, infers the right design direction, and ships interfaces that do not look templated. Real design systems when applicable, audit-first on redesigns, strict pre-flight check.
+description: Use when building or redesigning landing pages, portfolios, and marketing/front-facing websites where visual taste matters, including briefs with reference sites, screenshots, or requests to remove AI slop. Not for dashboards, dense product UI, data tables, or multi-step workflows.
 ---
 
 # tasteskill: Anti-Slop Frontend Skill
@@ -21,6 +21,8 @@ Before touching code or tweaking dials, **infer what the user actually wants**. 
 4. **Audience** - B2B procurement panel vs. design-conscious consumer vs. recruiter scanning a portfolio. The audience picks the aesthetic, not your taste.
 5. **Brand assets that already exist** - logo, color, type, photography. For redesigns, these are starting material, not optional input (see Section 11).
 6. **Quiet constraints** - accessibility-first audiences, public-sector, regulated industries, trust-first commerce, kids' products. These constraints OVERRIDE aesthetic preference.
+
+If the user's main direction is a reference URL or screenshot ("make it feel like this", "use this site as taste reference", "turn this into DESIGN.md"), read `references/reference-site-to-design-md.md` before code.
 
 ### 0.B Output a one-line "Design Read" before generating
 Before any code, state in one line: **"Reading this as: \<page kind> for \<audience>, with a \<vibe> language, leaning toward \<design system or aesthetic family>."**
@@ -916,6 +918,7 @@ Run this matrix before outputting code. This is the last filter.
 - [ ] **Brief inference** declared (Section 0.B one-liner)?
 - [ ] **Dial values** explicit and reasoned from the brief, not silently using baseline?
 - [ ] **Design system** chosen from Section 2 if applicable, or aesthetic labeled honestly?
+- [ ] **Reference-site boundary**: if a reference site/screenshot drove the design, a DESIGN.md or equivalent design brief exists, and it abstracts layout/tokens/motion without copying proprietary logo, copy, images, or brand assets?
 - [ ] **Redesign mode** detected and audit performed (if applicable, Section 11)?
 - [ ] **ZERO em-dashes (`—`) anywhere on the page.** Headlines, eyebrows, pills, body, quotes, attribution, captions, buttons, alt text. Zero. (Section 9.G - non-negotiable.)
 - [ ] **Page Theme Lock**: ONE theme (light, dark, or auto) for the whole page. No section flips to inverted mode mid-page (Section 4.11)?

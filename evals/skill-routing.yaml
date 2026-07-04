@@ -169,6 +169,13 @@
     - route-driven-work
     - paper-digest
 
+- query: "参考这个网站的高级感做一个 landing page，先整理成 DESIGN.md 再开始写页面"
+  should_load:
+    - design-taste-frontend
+  should_not_load:
+    - redesign-skill
+    - write-a-skill
+
 - query: "帮我创建一个新的 skill，用来处理数据库迁移排障"
   should_load:
     - write-a-skill
